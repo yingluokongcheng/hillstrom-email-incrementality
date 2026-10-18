@@ -2,7 +2,7 @@
 
 A reproducible analysis of a three-arm email experiment, separating overall incremental purchase effects from exploratory regional differences.
 
-[中文说明](README.zh-CN.md) · [Study design and results](docs/STUDY.md) · [Code and project structure](docs/STRUCTURE.md) · [Data and reproduction](docs/REPRODUCIBILITY.md)
+[Business case](docs/BUSINESS_CASE.md) · [中文说明](README.zh-CN.md) · [Study design and results](docs/STUDY.md) · [Code and project structure](docs/STRUCTURE.md) · [Data and reproduction](docs/REPRODUCIBILITY.md)
 
 ## Research question
 
