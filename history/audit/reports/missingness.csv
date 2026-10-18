@@ -1,0 +1,13 @@
+column,missing,dtype
+recency,0,int64
+history_segment,0,object
+history,0,float64
+mens,0,int64
+womens,0,int64
+zip_code,0,object
+newbie,0,int64
+channel,0,object
+segment,0,object
+visit,0,int64
+conversion,0,int64
+spend,0,float64

@@ -1,0 +1,14 @@
+{
+  "checked_at_utc": "2026-10-17T04:22:40.859501+00:00",
+  "url": "http://127.0.0.1:8768/reports/Hillstrom%E6%80%BB%E4%BD%93%E6%95%88%E6%9E%9C%E4%B8%8E%E5%9C%B0%E5%8C%BA%E6%8E%A2%E7%B4%A2.html",
+  "screenshots": [
+    "screenshots/primary-results.png",
+    "screenshots/regional-results.png"
+  ],
+  "checks": [
+    "Primary adjusted interval table and benchmark explanation readable",
+    "Regional nominal interval table and uncertainty narrative verified in accessibility state and screenshot"
+  ],
+  "tab_retained": true,
+  "published": false
+}

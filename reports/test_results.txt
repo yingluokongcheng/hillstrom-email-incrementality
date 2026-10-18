@@ -1,0 +1,13 @@
+test_bonferroni_shared_control_simulation (test_inference.InferenceTests.test_bonferroni_shared_control_simulation) ... ok
+test_bootstrap_zero_inclusion_and_sampling_variance (test_inference.InferenceTests.test_bootstrap_zero_inclusion_and_sampling_variance) ... ok
+test_ci_endpoints_match_independent_score (test_inference.InferenceTests.test_ci_endpoints_match_independent_score) ... ok
+test_independent_reference_statistics (test_inference.InferenceTests.test_independent_reference_statistics) ... ok
+test_interpretation_keeps_small_positive_and_null_distinct (test_inference.InferenceTests.test_interpretation_keeps_small_positive_and_null_distinct) ... ok
+test_known_effect_coverage_via_score_inversion (test_inference.InferenceTests.test_known_effect_coverage_via_score_inversion) ... ok
+test_sign_reversal (test_inference.InferenceTests.test_sign_reversal) ... ok
+test_sparse_stops_inference_without_deleting_rows (test_inference.InferenceTests.test_sparse_stops_inference_without_deleting_rows) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.273s
+
+OK

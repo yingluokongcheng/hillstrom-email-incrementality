@@ -1,0 +1,11 @@
+{
+  "version": "1.0",
+  "authorized_date": "2026-10-17",
+  "stage": "fixed_effect_analysis",
+  "all_rows_retained": true,
+  "primary": {"outcome":"conversion","control":"No E-Mail","treatments":["Mens E-Mail","Womens E-Mail"],"test":"score","compare":"diff","correction":true,"alternative":"two-sided","family_alpha":0.05,"per_comparison_alpha":0.025,"benchmark":0.001,"sparse_cell_min":10},
+  "regions": ["Urban","Suburban","Rural"],
+  "exploratory_alpha": 0.05,
+  "bootstrap": {"resamples":20000,"seed":20261017,"method":"percentile","quantile_method":"linear","resampling":"within original assignment groups; multinomial counts over unique spend values, equivalent to row resampling"},
+  "not_allowed": ["drop identical rows","posthoc subgroup searches","regression adjustment","direct campaign winner test","observed-effect posthoc power","publishing"]
+}

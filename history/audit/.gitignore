@@ -1,0 +1,6 @@
+.venv/
+__pycache__/
+data/raw/*.csv
+data/raw/*.gz
+reports/identical_rows.csv
+reports/screenshots/

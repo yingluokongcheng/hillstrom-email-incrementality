@@ -1,0 +1,163 @@
+{
+  "local_links_checked": 39,
+  "missing": [],
+  "scope": "Current root READMEs and docs; historical snapshots retain original-root context",
+  "links": [
+    {
+      "source": "README.md",
+      "target": "README.zh-CN.md"
+    },
+    {
+      "source": "README.md",
+      "target": "docs/STUDY.md"
+    },
+    {
+      "source": "README.md",
+      "target": "docs/STRUCTURE.md"
+    },
+    {
+      "source": "README.md",
+      "target": "docs/REPRODUCIBILITY.md"
+    },
+    {
+      "source": "README.md",
+      "target": "docs/STUDY.md"
+    },
+    {
+      "source": "README.md",
+      "target": "reports/effects_results.json"
+    },
+    {
+      "source": "README.md",
+      "target": "reports/Hillstrom总体效果与地区探索.html"
+    },
+    {
+      "source": "README.md",
+      "target": "docs/EXECUTION_SCOPE.md"
+    },
+    {
+      "source": "README.md",
+      "target": "docs/pre_run_freeze.json"
+    },
+    {
+      "source": "README.md",
+      "target": "docs/REPRODUCIBILITY.md"
+    },
+    {
+      "source": "README.md",
+      "target": "history/audit/README.md"
+    },
+    {
+      "source": "README.md",
+      "target": "history/audit/reports/audit_results.json"
+    },
+    {
+      "source": "README.md",
+      "target": "history/audit/reports/scenario_power.csv"
+    },
+    {
+      "source": "README.md",
+      "target": "reports/primary_conversion.csv"
+    },
+    {
+      "source": "README.md",
+      "target": "reports/exploratory_regions.csv"
+    },
+    {
+      "source": "README.md",
+      "target": "reports/exploratory_visit.csv"
+    },
+    {
+      "source": "README.md",
+      "target": "reports/exploratory_spend.csv"
+    },
+    {
+      "source": "README.md",
+      "target": "reports/bootstrap_group_means.csv"
+    },
+    {
+      "source": "README.md",
+      "target": "reports/verification.json"
+    },
+    {
+      "source": "README.md",
+      "target": "reports/packaging_verification.json"
+    },
+    {
+      "source": "README.md",
+      "target": "docs/HISTORY.md"
+    },
+    {
+      "source": "README.zh-CN.md",
+      "target": "README.md"
+    },
+    {
+      "source": "README.zh-CN.md",
+      "target": "docs/STUDY.md"
+    },
+    {
+      "source": "README.zh-CN.md",
+      "target": "docs/STRUCTURE.md"
+    },
+    {
+      "source": "README.zh-CN.md",
+      "target": "docs/REPRODUCIBILITY.md"
+    },
+    {
+      "source": "README.zh-CN.md",
+      "target": "README.md"
+    },
+    {
+      "source": "README.zh-CN.md",
+      "target": "reports/Hillstrom总体效果与地区探索.html"
+    },
+    {
+      "source": "README.zh-CN.md",
+      "target": "history/audit/reports/Hillstrom数据审计.html"
+    },
+    {
+      "source": "README.zh-CN.md",
+      "target": "docs/HISTORY.md"
+    },
+    {
+      "source": "docs/HISTORY.md",
+      "target": "audit_preservation.json"
+    },
+    {
+      "source": "docs/HISTORY.md",
+      "target": "effects_preservation.json"
+    },
+    {
+      "source": "docs/REPRODUCIBILITY.md",
+      "target": "../README.md"
+    },
+    {
+      "source": "docs/REPRODUCIBILITY.md",
+      "target": "../data/raw/source_manifest.json"
+    },
+    {
+      "source": "docs/REPRODUCIBILITY.md",
+      "target": "pre_run_freeze.json"
+    },
+    {
+      "source": "docs/STRUCTURE.md",
+      "target": "STUDY.md"
+    },
+    {
+      "source": "docs/STRUCTURE.md",
+      "target": "EXECUTION_SCOPE.md"
+    },
+    {
+      "source": "docs/STUDY.md",
+      "target": "EXECUTION_SCOPE.md"
+    },
+    {
+      "source": "docs/STUDY.md",
+      "target": "../reports/effects_results.json"
+    },
+    {
+      "source": "docs/STUDY.md",
+      "target": "../history/audit/reports/audit_results.json"
+    }
+  ]
+}

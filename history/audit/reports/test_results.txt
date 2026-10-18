@@ -1,0 +1,11 @@
+test_alias_invalid_values_and_missing_not_zero (test_audit.AuditTests.test_alias_invalid_values_and_missing_not_zero) ... ok
+test_equal_n_closed_form_planning (test_audit.AuditTests.test_equal_n_closed_form_planning) ... ok
+test_independent_csv_census (test_audit.AuditTests.test_independent_csv_census) ... ok
+test_null_size_and_sample_growth (test_audit.AuditTests.test_null_size_and_sample_growth) ... ok
+test_root_and_integer_minimum (test_audit.AuditTests.test_root_and_integer_minimum) ... ok
+test_scenario_power_binomial_check (test_audit.AuditTests.test_scenario_power_binomial_check) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.263s
+
+OK

@@ -1,0 +1,43 @@
+{
+  "stage": "audit_only_awaiting_user_review",
+  "n": 64000,
+  "columns": 12,
+  "raw_sha256": "00a6a868e05a9ffe7382da51629f6d6dce88c5acfc945e79d314ebc78fd3a2c0",
+  "plan_sha256": "f5cccb8b526a6b2ddd8c25599f07ee3e026ed60252904d84a3c7ec8636e97982",
+  "srm": {
+    "chi2": 0.20253125000000002,
+    "df": 2,
+    "p": 0.9036929575604196,
+    "threshold": 0.001
+  },
+  "missing_cells": 0,
+  "anomaly_flags": 0,
+  "identical_rows_all_members": 7634,
+  "identical_rows_excess": 6562,
+  "identical_row_patterns": 1072,
+  "identical_rows_with_history_29_99": 7570,
+  "rows_dropped": 0,
+  "rows_imputed": 0,
+  "customer_id_available": false,
+  "baseline_max_abs_smd": 0.016899120365944938,
+  "baseline_features_abs_smd_over_0_1": 0,
+  "minimum_overall_outcome_cell": 122,
+  "minimum_region_outcome_cell": 26,
+  "sparse_regions": [],
+  "structural_blockers": [],
+  "effects_computed": false,
+  "outcome_exposure": "Group/region purchase counts and row logic inspected for audit. This is not blinded analysis.",
+  "limitations": [
+    "Mirror checksum matches its documentation, but original bytes not compared.",
+    "No customer ID, assignment log, delivery log, exact timestamps, costs or unsubscribe data.",
+    "Identical rows retained: unique customers and original roster coverage cannot be independently verified.",
+    "Region has three urbanicity labels, not city/province or cultural preference measures.",
+    "Power and MDE use hypothetical rates, not observed treatment differences; approximations, not guarantees."
+  ],
+  "environment": {
+    "python": "3.12.14",
+    "numpy": "2.2.6",
+    "pandas": "2.2.3",
+    "scipy": "1.15.3"
+  }
+}

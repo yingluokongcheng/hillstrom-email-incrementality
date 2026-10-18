@@ -1,0 +1,90 @@
+{
+  "verified_at_utc": "2026-10-17T04:11:47.991425+00:00",
+  "tests_passed": true,
+  "test_methods": 6,
+  "test_log": "test_results.txt",
+  "independent_directory": "C:\\Users\\28600\\Documents\\Codex\\2026-10-16\\github-plugin-github-openai-curated-remote\\work\\hillstrom-audit-reproduction-20261017",
+  "network_block": "Python socket connect/connect_ex/create_connection/getaddrinfo blocked; not OS firewall",
+  "reproduced_files": [
+    {
+      "file": "anomaly_rows.csv",
+      "sha256": "1ab06a36264b9952d9838cd0f9bb3c77afe39801db68af4a9ad8975103855f9c",
+      "byte_identical": true
+    },
+    {
+      "file": "anomaly_summary.csv",
+      "sha256": "2f8a82a9efed193434326542a75ff0bdfea7e87d6c82bb88ce7ee78a88c405d8",
+      "byte_identical": true
+    },
+    {
+      "file": "audit_results.json",
+      "sha256": "87334299f75e0f1ec567a8f2294235203a31d109352af59265f642aa2774aaf1",
+      "byte_identical": true
+    },
+    {
+      "file": "baseline_balance.csv",
+      "sha256": "70380bae959bc9fb33c65154d8938bfe36bead8a4d1f431f76ad62b916921557",
+      "byte_identical": true
+    },
+    {
+      "file": "group_counts.csv",
+      "sha256": "b413a6eadd813c0fbb7034784c1ebba718d91eb13b4141caf555b90275a08b96",
+      "byte_identical": true
+    },
+    {
+      "file": "Hillstrom数据审计.html",
+      "sha256": "6aa5488180bfd8b7978c3a3590b649a6d5b0051a4aa3a86bd7a04bff311fe5f4",
+      "byte_identical": true
+    },
+    {
+      "file": "identical_rows.csv",
+      "sha256": "660b04e4c69f65a5fc7c97ac5015195dbb11aefa9fcc95a8e4531b657dce64f7",
+      "byte_identical": true
+    },
+    {
+      "file": "missingness.csv",
+      "sha256": "1f187605535c0f66de763f20575fb350b95698f9d6a0c491324a4526e9d80b27",
+      "byte_identical": true
+    },
+    {
+      "file": "missingness_by_group.csv",
+      "sha256": "4fa246ecddd92e06766caf6ec706107286b185ae4ebffc4f96c0d0cca4874ba4",
+      "byte_identical": true
+    },
+    {
+      "file": "numeric_ranges.csv",
+      "sha256": "f7c5d35f9fba3570876bd61714d6d90777be8b74f20af07d855fb334232f4337",
+      "byte_identical": true
+    },
+    {
+      "file": "region_alias.csv",
+      "sha256": "6b37ecd8d24e67ca809310c4c4d41272ead3195754862055d4c8383cc2ae2c71",
+      "byte_identical": true
+    },
+    {
+      "file": "region_group_counts.csv",
+      "sha256": "5b5a4a75f8fac85ee9f4886c7cf7ba1e84f0362bf913b6ac104e708b199d32f8",
+      "byte_identical": true
+    },
+    {
+      "file": "scenario_mde.csv",
+      "sha256": "11c640e9b51cb75eb1393262a67328e0085056737c6d6fcc5a15618ae38137e4",
+      "byte_identical": true
+    },
+    {
+      "file": "scenario_power.csv",
+      "sha256": "cf80250f3e924d6b7366bbbb1cc0375cbce85a5933d546bd7063babeb03ce1a9",
+      "byte_identical": true
+    },
+    {
+      "file": "scenario_required_n.csv",
+      "sha256": "d61dded4b081e570ae12464fb6656dc5fae156d26e930e5d9819a8bfbbd79587",
+      "byte_identical": true
+    }
+  ],
+  "all_byte_identical": true,
+  "local_html_links_checked": 17,
+  "raw_sha256": "00a6a868e05a9ffe7382da51629f6d6dce88c5acfc945e79d314ebc78fd3a2c0",
+  "effect_analysis_run": false,
+  "note": "Binomial simulations in tests validate planning formulas on hypothetical scenarios only."
+}

@@ -1,0 +1,17 @@
+{
+  "version": "1.0",
+  "confirmed_date": "2026-10-17",
+  "stage": "audit_only",
+  "groups": ["Mens E-Mail", "Womens E-Mail", "No E-Mail"],
+  "regions": ["Urban", "Suburban", "Rural"],
+  "expected_n": 64000,
+  "srm_alpha": 0.001,
+  "sparse_cell_min": 10,
+  "family_alpha": 0.05,
+  "comparison_alpha": 0.025,
+  "scenario_benchmark": 0.001,
+  "baseline_rates": [0.005, 0.01, 0.02],
+  "effects": [0.001, 0.002, 0.003],
+  "powers": [0.8, 0.9],
+  "seed": 20261017
+}

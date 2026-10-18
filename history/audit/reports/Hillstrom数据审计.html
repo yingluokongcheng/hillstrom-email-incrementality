@@ -1,0 +1,2649 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Hillstrom 数据审计与样本支撑</title><style>
+*{box-sizing:border-box}body{margin:0;background:#f3f6fa;color:#1e2b3b;font:16px/1.8 system-ui,"Microsoft YaHei",sans-serif}
+main{max-width:1120px;margin:36px auto;padding:0 24px 60px}header{background:#152f47;color:white;padding:32px;border-radius:16px}
+h1{font-size:30px;margin:8px 0}h2{margin-top:34px;font-size:22px}p{margin:12px 0}.eyebrow{font-size:13px;letter-spacing:1px;color:#bdd5e8}
+.callout{padding:20px 24px;background:#fff5d9;border-left:5px solid #b57e15;border-radius:8px;margin:24px 0}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:20px 0}.card{background:white;padding:18px;border-radius:10px;border:1px solid #dce4ed}
+.big{display:block;font-size:26px;font-weight:700;color:#17636b}.table-wrap{overflow-x:auto;background:white;border:1px solid #dce4ed;border-radius:9px;margin:14px 0}
+table{border-collapse:collapse;width:100%;font-size:14px}th,td{padding:10px 12px;text-align:left;border-bottom:1px solid #e7edf2;white-space:nowrap}
+th{background:#eaf1f7;color:#21415a}tr:last-child td{border-bottom:0}a{color:#126b87}code{overflow-wrap:anywhere;white-space:normal;font-size:13px}
+details{background:white;padding:12px 16px;margin:10px 0;border-radius:8px;border:1px solid #dce4ed}summary{cursor:pointer;font-weight:600}
+.note{font-size:14px;color:#526275}footer{margin-top:30px;border-top:1px solid #cbd6e1;padding-top:16px}
+@media(max-width:700px){.cards{grid-template-columns:repeat(2,1fr)}main{padding:0 12px}header{padding:20px}h1{font-size:25px}}
+</style></head><body><main>
+<header><div class="eyebrow">HILLSTROM · LOCAL REPRODUCIBLE AUDIT · 2026-10-17</div><h1>数据可以支持什么程度的结论？</h1>
+<p>固定计划 v1 · 总体增量为主 / 地区探索为辅<br>当前阶段：审计完成，等待确认；尚未运行邮件效果分析。</p></header>
+<div class="cards"><div class="card"><span class="big">64,000</span>原始记录</div><div class="card"><span class="big">0</span>缺失单元格</div>
+<div class="card"><span class="big">0.9037</span>整体 SRM p 值</div><div class="card"><span class="big">+0.10 pp</span>固定情景基准</div></div>
+<div class="callout"><b>结论：可在来源与身份限制下继续固定总体分析，但样本不足以稳定识别 +0.10 个百分点的小提升。</b>
+<p>在假设基线为1%、每项双侧 α=0.025 时，总体对该提升的近似功效约11%，80%功效所需效果约+0.32个百分点。地区更弱，应维持探索定位。此处是预设情景规划，不是邮件实际效果。</p></div>
+<h2>01 / 分组比例与分组前平衡</h2><div class="table-wrap"><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>分配组</th>
+      <th>样本数</th>
+      <th>分配比例</th>
+      <th>购买数（稀疏检查）</th>
+      <th>未购买数</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>男装邮件</td>
+      <td>21307</td>
+      <td>33.292%</td>
+      <td>267</td>
+      <td>21040</td>
+    </tr>
+    <tr>
+      <td>女装邮件</td>
+      <td>21387</td>
+      <td>33.417%</td>
+      <td>189</td>
+      <td>21198</td>
+    </tr>
+    <tr>
+      <td>不发邮件</td>
+      <td>21306</td>
+      <td>33.291%</td>
+      <td>122</td>
+      <td>21184</td>
+    </tr>
+  </tbody>
+</table></div>
+<p>按1∶1∶1检查：χ²=0.202531，自由度2，p=0.903693，未触发预设 p&lt;0.001 阈值。
+分组前变量最大 |SMD|=0.0169，超过0.1的比较数为0。这未发现明显分配失衡，但不能证明原始随机化、身份独立性或名册完整性。</p>
+<p class="note">购买数仅用于稀疏检查。本轮已查看分组结果计数，因此后续不能称为盲态分析；没有计算购买率差、效果p值或邮件优劣排名。</p>
+<h2>02 / 缺失、异常与重复记录风险</h2><div class="table-wrap"><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>检查</th>
+      <th>结果</th>
+      <th>解释</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>缺失单元格</td>
+      <td>0</td>
+      <td>12个字段及各分组均检查</td>
+    </tr>
+    <tr>
+      <td>非法值/区间/结果逻辑检查命中</td>
+      <td>0</td>
+      <td>详细检查项见下方明细</td>
+    </tr>
+    <tr>
+      <td>相同行涉及的行数</td>
+      <td>7634</td>
+      <td>不等于已证实的重复客户</td>
+    </tr>
+    <tr>
+      <td>相同组合数</td>
+      <td>1072</td>
+      <td>每种组合至少出现两次</td>
+    </tr>
+    <tr>
+      <td>每种组合只留首行时会删掉的行数</td>
+      <td>6562</td>
+      <td>只是计数；本项目未去重</td>
+    </tr>
+    <tr>
+      <td>相同行中 history=29.99 的行数</td>
+      <td>7570</td>
+      <td>共同取值可使不同客户记录相同，不能据此证明身份</td>
+    </tr>
+    <tr>
+      <td>删除/填补行数</td>
+      <td>0 / 0</td>
+      <td>原始64,000行完整保留</td>
+    </tr>
+  </tbody>
+</table></div>
+<p>全部购买/未购买格计数在总体最少为122，地区最少为26，均超过预设10的稀疏阈值。
+但“可计算常规统计量”不等于“有足够功效识别小效果”。</p>
+<p><b>7,634行涉及完全相同的12字段组合，未删除。</b>其中7,570行历史消费额为29.99。共同价格、粗粒度特征和二元结果可能产生相同行；没有客户ID，无法认定是重复抽样，也无法确认都是独立客户。
+所有功效规划均以行代表独立客户为条件；如果实际存在重复客户，精度可能被高估。未用去重后的样本另跑结果。</p>
+<p>地区原值为 <code>Surburban</code>，涉及28,776行；仅派生展示名称为 <code>Suburban</code>。原始文件未改。这个变量只是城乡分类，无法用于具体城市或文化解释。</p>
+<p><a href="identical_rows.csv">相同行清单（含CSV行号）</a> · <a href="anomaly_rows.csv">逻辑异常行清单</a> · <a href="region_alias.csv">名称映射记录</a></p>
+<h2>03 / 总体与地区样本覆盖</h2><div class="table-wrap"><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>地区</th>
+      <th>男装邮件样本</th>
+      <th>女装邮件样本</th>
+      <th>不发邮件样本</th>
+      <th>最少单组购买数</th>
+      <th>合计</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>城市 Urban</td>
+      <td>8563</td>
+      <td>8556</td>
+      <td>8542</td>
+      <td>48</td>
+      <td>25661</td>
+    </tr>
+    <tr>
+      <td>郊区 Suburban</td>
+      <td>9501</td>
+      <td>9650</td>
+      <td>9625</td>
+      <td>48</td>
+      <td>28776</td>
+    </tr>
+    <tr>
+      <td>乡村 Rural</td>
+      <td>3243</td>
+      <td>3181</td>
+      <td>3139</td>
+      <td>26</td>
+      <td>9563</td>
+    </tr>
+  </tbody>
+</table></div>
+<h2>04 / 样本量能否支撑 +0.10 个百分点？</h2>
+<p>下表覆盖预先固定的全部三种基线情景。区间表示两项邮件—对照比较之间的范围，不是置信区间。pp=百分点；MDE=达到指定功效所需的最小可检出正向差异。</p>
+<div class="table-wrap"><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>范围</th>
+      <th>假设基线</th>
+      <th>检出+0.10pp的功效</th>
+      <th>80%功效 MDE（pp）</th>
+      <th>90%功效 MDE（pp）</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>总体</td>
+      <td>0.5%</td>
+      <td>19.9–19.9%</td>
+      <td>0.234–0.234</td>
+      <td>0.271–0.271</td>
+    </tr>
+    <tr>
+      <td>总体</td>
+      <td>1.0%</td>
+      <td>11.0–11.0%</td>
+      <td>0.320–0.320</td>
+      <td>0.369–0.369</td>
+    </tr>
+    <tr>
+      <td>总体</td>
+      <td>2.0%</td>
+      <td>6.7–6.7%</td>
+      <td>0.440–0.440</td>
+      <td>0.506–0.507</td>
+    </tr>
+    <tr>
+      <td>城市 Urban</td>
+      <td>0.5%</td>
+      <td>8.8–8.8%</td>
+      <td>0.392–0.392</td>
+      <td>0.458–0.458</td>
+    </tr>
+    <tr>
+      <td>城市 Urban</td>
+      <td>1.0%</td>
+      <td>5.7–5.7%</td>
+      <td>0.527–0.527</td>
+      <td>0.612–0.612</td>
+    </tr>
+    <tr>
+      <td>城市 Urban</td>
+      <td>2.0%</td>
+      <td>4.1–4.1%</td>
+      <td>0.715–0.715</td>
+      <td>0.827–0.827</td>
+    </tr>
+    <tr>
+      <td>郊区 Suburban</td>
+      <td>0.5%</td>
+      <td>9.7–9.7%</td>
+      <td>0.366–0.367</td>
+      <td>0.427–0.429</td>
+    </tr>
+    <tr>
+      <td>郊区 Suburban</td>
+      <td>1.0%</td>
+      <td>6.1–6.1%</td>
+      <td>0.493–0.495</td>
+      <td>0.572–0.574</td>
+    </tr>
+    <tr>
+      <td>郊区 Suburban</td>
+      <td>2.0%</td>
+      <td>4.3–4.3%</td>
+      <td>0.671–0.673</td>
+      <td>0.775–0.778</td>
+    </tr>
+    <tr>
+      <td>乡村 Rural</td>
+      <td>0.5%</td>
+      <td>4.7–4.7%</td>
+      <td>0.712–0.716</td>
+      <td>0.844–0.848</td>
+    </tr>
+    <tr>
+      <td>乡村 Rural</td>
+      <td>1.0%</td>
+      <td>3.6–3.6%</td>
+      <td>0.928–0.933</td>
+      <td>1.088–1.094</td>
+    </tr>
+    <tr>
+      <td>乡村 Rural</td>
+      <td>2.0%</td>
+      <td>3.1–3.1%</td>
+      <td>1.233–1.239</td>
+      <td>1.435–1.442</td>
+    </tr>
+  </tbody>
+</table></div>
+<p>所有情景使用每项双侧 α=0.025，正态近似 score 功效公式；不使用实际购买率或观察效果作为输入。
+地区使用同一阈值作精度参照，不赋予六项地区比较确认性地位；功效也不等于两项检验同时成功的概率。</p>
+<p>如果未来实验的基线确为1%，要对+0.10pp达到下列功效，三组等额分配约需要：</p><div class="table-wrap"><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>目标功效（每项比较）</th>
+      <th>每组约需人数</th>
+      <th>三组等额合计</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>80%</td>
+      <td>197509</td>
+      <td>592527</td>
+    </tr>
+    <tr>
+      <td>90%</td>
+      <td>257897</td>
+      <td>773691</td>
+    </tr>
+  </tbody>
+</table></div>
+<p>这是未来规划情景，不建议为了本项目“凑人数”，也不会过采样、合并地区或更换主指标追求显著。若后续区间跨零且包含有意义提升，应写“证据不足”；不能写成“邮件无效”或“当地客户不敏感”。</p>
+<h2>05 / 来源与可验证边界</h2>
+<p>原作者CSV地址因证书验证失败未取得，未关闭TLS验证。使用<a href="https://www.uplift-modeling.com/en/latest/api/datasets/fetch_hillstrom.html">scikit-uplift文档副本</a>；压缩包MD5与文档一致。
+没有与作者原始字节对账。<a href="https://blog.minethatdata.com/2008/03/minethatdata-e-mail-analytics-and-data.html">原始研究说明</a>提供随机分组与两周观察背景。</p>
+<p>CSV SHA-256：<code>00a6a868e05a9ffe7382da51629f6d6dce88c5acfc945e79d314ebc78fd3a2c0</code><br>来源、下载时间、尝试记录与下载前计划哈希见 <a href="../data/raw/source_manifest.json">source_manifest.json</a>。</p>
+<p>缺少客户ID、分配/送达日志和时间戳，无法独立核验重复身份、投递执行、每人观察窗口及原始完整名册。无成本、利润和退订数据；+0.10pp不是盈利门槛。</p>
+<h2>06 / 审计判定与下一步</h2><p><b>未触发预设的结构性停止规则；仍需用户审计确认</b></p>
+<p>建议保留原计划：总体做两项固定比较；三个地区只作带不确定性的探索。必须携带相同行及来源限制，并接受可能无法排除小幅有益效果。用户确认审计前，不执行效果分析。</p>
+<h2>07 / 完整可追溯明细</h2><details><summary>全部字段缺失 · <a href="missingness.csv">CSV</a></summary><div class="table-wrap"><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>column</th>
+      <th>missing</th>
+      <th>dtype</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>recency</td>
+      <td>0</td>
+      <td>int64</td>
+    </tr>
+    <tr>
+      <td>history_segment</td>
+      <td>0</td>
+      <td>object</td>
+    </tr>
+    <tr>
+      <td>history</td>
+      <td>0</td>
+      <td>float64</td>
+    </tr>
+    <tr>
+      <td>mens</td>
+      <td>0</td>
+      <td>int64</td>
+    </tr>
+    <tr>
+      <td>womens</td>
+      <td>0</td>
+      <td>int64</td>
+    </tr>
+    <tr>
+      <td>zip_code</td>
+      <td>0</td>
+      <td>object</td>
+    </tr>
+    <tr>
+      <td>newbie</td>
+      <td>0</td>
+      <td>int64</td>
+    </tr>
+    <tr>
+      <td>channel</td>
+      <td>0</td>
+      <td>object</td>
+    </tr>
+    <tr>
+      <td>segment</td>
+      <td>0</td>
+      <td>object</td>
+    </tr>
+    <tr>
+      <td>visit</td>
+      <td>0</td>
+      <td>int64</td>
+    </tr>
+    <tr>
+      <td>conversion</td>
+      <td>0</td>
+      <td>int64</td>
+    </tr>
+    <tr>
+      <td>spend</td>
+      <td>0</td>
+      <td>float64</td>
+    </tr>
+  </tbody>
+</table></div></details><details><summary>按组缺失 · <a href="missingness_by_group.csv">CSV</a></summary><div class="table-wrap"><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>segment</th>
+      <th>column</th>
+      <th>n</th>
+      <th>missing</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Mens E-Mail</td>
+      <td>recency</td>
+      <td>21307</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>Mens E-Mail</td>
+      <td>history_segment</td>
+      <td>21307</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>Mens E-Mail</td>
+      <td>history</td>
+      <td>21307</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>Mens E-Mail</td>
+      <td>mens</td>
+      <td>21307</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>Mens E-Mail</td>
+      <td>womens</td>
+      <td>21307</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>Mens E-Mail</td>
+      <td>zip_code</td>
+      <td>21307</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>Mens E-Mail</td>
+      <td>newbie</td>
+      <td>21307</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>Mens E-Mail</td>
+      <td>channel</td>
+      <td>21307</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>Mens E-Mail</td>
+      <td>segment</td>
+      <td>21307</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>Mens E-Mail</td>
+      <td>visit</td>
+      <td>21307</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>Mens E-Mail</td>
+      <td>conversion</td>
+      <td>21307</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>Mens E-Mail</td>
+      <td>spend</td>
+      <td>21307</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>No E-Mail</td>
+      <td>recency</td>
+      <td>21306</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>No E-Mail</td>
+      <td>history_segment</td>
+      <td>21306</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>No E-Mail</td>
+      <td>history</td>
+      <td>21306</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>No E-Mail</td>
+      <td>mens</td>
+      <td>21306</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>No E-Mail</td>
+      <td>womens</td>
+      <td>21306</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>No E-Mail</td>
+      <td>zip_code</td>
+      <td>21306</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>No E-Mail</td>
+      <td>newbie</td>
+      <td>21306</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>No E-Mail</td>
+      <td>channel</td>
+      <td>21306</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>No E-Mail</td>
+      <td>segment</td>
+      <td>21306</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>No E-Mail</td>
+      <td>visit</td>
+      <td>21306</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>No E-Mail</td>
+      <td>conversion</td>
+      <td>21306</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>No E-Mail</td>
+      <td>spend</td>
+      <td>21306</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>Womens E-Mail</td>
+      <td>recency</td>
+      <td>21387</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>Womens E-Mail</td>
+      <td>history_segment</td>
+      <td>21387</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>Womens E-Mail</td>
+      <td>history</td>
+      <td>21387</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>Womens E-Mail</td>
+      <td>mens</td>
+      <td>21387</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>Womens E-Mail</td>
+      <td>womens</td>
+      <td>21387</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>Womens E-Mail</td>
+      <td>zip_code</td>
+      <td>21387</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>Womens E-Mail</td>
+      <td>newbie</td>
+      <td>21387</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>Womens E-Mail</td>
+      <td>channel</td>
+      <td>21387</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>Womens E-Mail</td>
+      <td>segment</td>
+      <td>21387</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>Womens E-Mail</td>
+      <td>visit</td>
+      <td>21387</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>Womens E-Mail</td>
+      <td>conversion</td>
+      <td>21387</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>Womens E-Mail</td>
+      <td>spend</td>
+      <td>21387</td>
+      <td>0</td>
+    </tr>
+  </tbody>
+</table></div></details><details><summary>全部异常规则 · <a href="anomaly_summary.csv">CSV</a></summary><div class="table-wrap"><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>check</th>
+      <th>rows</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>recency:non_numeric_or_nonfinite</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>history:non_numeric_or_nonfinite</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>mens:non_numeric_or_nonfinite</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>womens:non_numeric_or_nonfinite</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>newbie:non_numeric_or_nonfinite</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>visit:non_numeric_or_nonfinite</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>conversion:non_numeric_or_nonfinite</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>spend:non_numeric_or_nonfinite</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>mens:not_binary</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>womens:not_binary</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>newbie:not_binary</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>visit:not_binary</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>conversion:not_binary</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>recency:outside_integer_1_12</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>history:negative</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>spend:negative</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>segment:unknown</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>region:unknown</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>channel:unknown</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>history_segment:unknown</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>history:outside_labeled_band</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>conversion1_spend_not_positive</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>conversion0_spend_positive</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>conversion1_visit0</td>
+      <td>0</td>
+    </tr>
+  </tbody>
+</table></div></details><details><summary>数值范围 · <a href="numeric_ranges.csv">CSV</a></summary><div class="table-wrap"><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>column</th>
+      <th>min</th>
+      <th>max</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>recency</td>
+      <td>1.0000</td>
+      <td>12.0000</td>
+    </tr>
+    <tr>
+      <td>history</td>
+      <td>29.9900</td>
+      <td>3345.9300</td>
+    </tr>
+    <tr>
+      <td>mens</td>
+      <td>0.0000</td>
+      <td>1.0000</td>
+    </tr>
+    <tr>
+      <td>womens</td>
+      <td>0.0000</td>
+      <td>1.0000</td>
+    </tr>
+    <tr>
+      <td>newbie</td>
+      <td>0.0000</td>
+      <td>1.0000</td>
+    </tr>
+    <tr>
+      <td>visit</td>
+      <td>0.0000</td>
+      <td>1.0000</td>
+    </tr>
+    <tr>
+      <td>conversion</td>
+      <td>0.0000</td>
+      <td>1.0000</td>
+    </tr>
+    <tr>
+      <td>spend</td>
+      <td>0.0000</td>
+      <td>499.0000</td>
+    </tr>
+  </tbody>
+</table></div></details><details><summary>地区×组全部计数 · <a href="region_group_counts.csv">CSV</a></summary><div class="table-wrap"><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>region</th>
+      <th>segment</th>
+      <th>n</th>
+      <th>purchases</th>
+      <th>nonpurchases</th>
+      <th>missing_purchase</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Rural</td>
+      <td>Mens E-Mail</td>
+      <td>3243</td>
+      <td>44</td>
+      <td>3199</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>Rural</td>
+      <td>No E-Mail</td>
+      <td>3139</td>
+      <td>26</td>
+      <td>3113</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>Rural</td>
+      <td>Womens E-Mail</td>
+      <td>3181</td>
+      <td>37</td>
+      <td>3144</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>Suburban</td>
+      <td>Mens E-Mail</td>
+      <td>9501</td>
+      <td>118</td>
+      <td>9383</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>Suburban</td>
+      <td>No E-Mail</td>
+      <td>9625</td>
+      <td>48</td>
+      <td>9577</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>Suburban</td>
+      <td>Womens E-Mail</td>
+      <td>9650</td>
+      <td>73</td>
+      <td>9577</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>Urban</td>
+      <td>Mens E-Mail</td>
+      <td>8563</td>
+      <td>105</td>
+      <td>8458</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>Urban</td>
+      <td>No E-Mail</td>
+      <td>8542</td>
+      <td>48</td>
+      <td>8494</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>Urban</td>
+      <td>Womens E-Mail</td>
+      <td>8556</td>
+      <td>79</td>
+      <td>8477</td>
+      <td>0</td>
+    </tr>
+  </tbody>
+</table></div></details><details><summary>完整分组前平衡 · <a href="baseline_balance.csv">CSV</a></summary><div class="table-wrap"><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>variable</th>
+      <th>group_a</th>
+      <th>group_b</th>
+      <th>n_a</th>
+      <th>n_b</th>
+      <th>mean_or_share_a</th>
+      <th>mean_or_share_b</th>
+      <th>smd</th>
+      <th>abs_smd</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>history</td>
+      <td>Mens E-Mail</td>
+      <td>Womens E-Mail</td>
+      <td>21307</td>
+      <td>21387</td>
+      <td>242.8359</td>
+      <td>242.5366</td>
+      <td>0.0012</td>
+      <td>0.0012</td>
+    </tr>
+    <tr>
+      <td>history</td>
+      <td>Mens E-Mail</td>
+      <td>No E-Mail</td>
+      <td>21307</td>
+      <td>21306</td>
+      <td>242.8359</td>
+      <td>240.8827</td>
+      <td>0.0076</td>
+      <td>0.0076</td>
+    </tr>
+    <tr>
+      <td>history</td>
+      <td>Womens E-Mail</td>
+      <td>No E-Mail</td>
+      <td>21387</td>
+      <td>21306</td>
+      <td>242.5366</td>
+      <td>240.8827</td>
+      <td>0.0065</td>
+      <td>0.0065</td>
+    </tr>
+    <tr>
+      <td>recency</td>
+      <td>Mens E-Mail</td>
+      <td>Womens E-Mail</td>
+      <td>21307</td>
+      <td>21387</td>
+      <td>5.7736</td>
+      <td>5.7678</td>
+      <td>0.0016</td>
+      <td>0.0016</td>
+    </tr>
+    <tr>
+      <td>recency</td>
+      <td>Mens E-Mail</td>
+      <td>No E-Mail</td>
+      <td>21307</td>
+      <td>21306</td>
+      <td>5.7736</td>
+      <td>5.7497</td>
+      <td>0.0068</td>
+      <td>0.0068</td>
+    </tr>
+    <tr>
+      <td>recency</td>
+      <td>Womens E-Mail</td>
+      <td>No E-Mail</td>
+      <td>21387</td>
+      <td>21306</td>
+      <td>5.7678</td>
+      <td>5.7497</td>
+      <td>0.0052</td>
+      <td>0.0052</td>
+    </tr>
+    <tr>
+      <td>mens</td>
+      <td>Mens E-Mail</td>
+      <td>Womens E-Mail</td>
+      <td>21307</td>
+      <td>21387</td>
+      <td>0.5509</td>
+      <td>0.5489</td>
+      <td>0.0040</td>
+      <td>0.0040</td>
+    </tr>
+    <tr>
+      <td>mens</td>
+      <td>Mens E-Mail</td>
+      <td>No E-Mail</td>
+      <td>21307</td>
+      <td>21306</td>
+      <td>0.5509</td>
+      <td>0.5532</td>
+      <td>-0.0046</td>
+      <td>0.0046</td>
+    </tr>
+    <tr>
+      <td>mens</td>
+      <td>Womens E-Mail</td>
+      <td>No E-Mail</td>
+      <td>21387</td>
+      <td>21306</td>
+      <td>0.5489</td>
+      <td>0.5532</td>
+      <td>-0.0086</td>
+      <td>0.0086</td>
+    </tr>
+    <tr>
+      <td>womens</td>
+      <td>Mens E-Mail</td>
+      <td>Womens E-Mail</td>
+      <td>21307</td>
+      <td>21387</td>
+      <td>0.5514</td>
+      <td>0.5501</td>
+      <td>0.0026</td>
+      <td>0.0026</td>
+    </tr>
+    <tr>
+      <td>womens</td>
+      <td>Mens E-Mail</td>
+      <td>No E-Mail</td>
+      <td>21307</td>
+      <td>21306</td>
+      <td>0.5514</td>
+      <td>0.5476</td>
+      <td>0.0076</td>
+      <td>0.0076</td>
+    </tr>
+    <tr>
+      <td>womens</td>
+      <td>Womens E-Mail</td>
+      <td>No E-Mail</td>
+      <td>21387</td>
+      <td>21306</td>
+      <td>0.5501</td>
+      <td>0.5476</td>
+      <td>0.0049</td>
+      <td>0.0049</td>
+    </tr>
+    <tr>
+      <td>newbie</td>
+      <td>Mens E-Mail</td>
+      <td>Womens E-Mail</td>
+      <td>21307</td>
+      <td>21387</td>
+      <td>0.5015</td>
+      <td>0.5032</td>
+      <td>-0.0034</td>
+      <td>0.0034</td>
+    </tr>
+    <tr>
+      <td>newbie</td>
+      <td>Mens E-Mail</td>
+      <td>No E-Mail</td>
+      <td>21307</td>
+      <td>21306</td>
+      <td>0.5015</td>
+      <td>0.5020</td>
+      <td>-0.0009</td>
+      <td>0.0009</td>
+    </tr>
+    <tr>
+      <td>newbie</td>
+      <td>Womens E-Mail</td>
+      <td>No E-Mail</td>
+      <td>21387</td>
+      <td>21306</td>
+      <td>0.5032</td>
+      <td>0.5020</td>
+      <td>0.0026</td>
+      <td>0.0026</td>
+    </tr>
+    <tr>
+      <td>history_segment=1) $0 - $100</td>
+      <td>Mens E-Mail</td>
+      <td>Womens E-Mail</td>
+      <td>21307</td>
+      <td>21387</td>
+      <td>0.3625</td>
+      <td>0.3569</td>
+      <td>0.0116</td>
+      <td>0.0116</td>
+    </tr>
+    <tr>
+      <td>history_segment=1) $0 - $100</td>
+      <td>Mens E-Mail</td>
+      <td>No E-Mail</td>
+      <td>21307</td>
+      <td>21306</td>
+      <td>0.3625</td>
+      <td>0.3573</td>
+      <td>0.0109</td>
+      <td>0.0109</td>
+    </tr>
+    <tr>
+      <td>history_segment=1) $0 - $100</td>
+      <td>Womens E-Mail</td>
+      <td>No E-Mail</td>
+      <td>21387</td>
+      <td>21306</td>
+      <td>0.3569</td>
+      <td>0.3573</td>
+      <td>-0.0007</td>
+      <td>0.0007</td>
+    </tr>
+    <tr>
+      <td>history_segment=2) $100 - $200</td>
+      <td>Mens E-Mail</td>
+      <td>Womens E-Mail</td>
+      <td>21307</td>
+      <td>21387</td>
+      <td>0.2202</td>
+      <td>0.2210</td>
+      <td>-0.0021</td>
+      <td>0.0021</td>
+    </tr>
+    <tr>
+      <td>history_segment=2) $100 - $200</td>
+      <td>Mens E-Mail</td>
+      <td>No E-Mail</td>
+      <td>21307</td>
+      <td>21306</td>
+      <td>0.2202</td>
+      <td>0.2270</td>
+      <td>-0.0164</td>
+      <td>0.0164</td>
+    </tr>
+    <tr>
+      <td>history_segment=2) $100 - $200</td>
+      <td>Womens E-Mail</td>
+      <td>No E-Mail</td>
+      <td>21387</td>
+      <td>21306</td>
+      <td>0.2210</td>
+      <td>0.2270</td>
+      <td>-0.0143</td>
+      <td>0.0143</td>
+    </tr>
+    <tr>
+      <td>history_segment=3) $200 - $350</td>
+      <td>Mens E-Mail</td>
+      <td>Womens E-Mail</td>
+      <td>21307</td>
+      <td>21387</td>
+      <td>0.1920</td>
+      <td>0.1943</td>
+      <td>-0.0059</td>
+      <td>0.0059</td>
+    </tr>
+    <tr>
+      <td>history_segment=3) $200 - $350</td>
+      <td>Mens E-Mail</td>
+      <td>No E-Mail</td>
+      <td>21307</td>
+      <td>21306</td>
+      <td>0.1920</td>
+      <td>0.1898</td>
+      <td>0.0055</td>
+      <td>0.0055</td>
+    </tr>
+    <tr>
+      <td>history_segment=3) $200 - $350</td>
+      <td>Womens E-Mail</td>
+      <td>No E-Mail</td>
+      <td>21387</td>
+      <td>21306</td>
+      <td>0.1943</td>
+      <td>0.1898</td>
+      <td>0.0114</td>
+      <td>0.0114</td>
+    </tr>
+    <tr>
+      <td>history_segment=4) $350 - $500</td>
+      <td>Mens E-Mail</td>
+      <td>Womens E-Mail</td>
+      <td>21307</td>
+      <td>21387</td>
+      <td>0.0984</td>
+      <td>0.1023</td>
+      <td>-0.0129</td>
+      <td>0.0129</td>
+    </tr>
+    <tr>
+      <td>history_segment=4) $350 - $500</td>
+      <td>Mens E-Mail</td>
+      <td>No E-Mail</td>
+      <td>21307</td>
+      <td>21306</td>
+      <td>0.0984</td>
+      <td>0.0997</td>
+      <td>-0.0043</td>
+      <td>0.0043</td>
+    </tr>
+    <tr>
+      <td>history_segment=4) $350 - $500</td>
+      <td>Womens E-Mail</td>
+      <td>No E-Mail</td>
+      <td>21387</td>
+      <td>21306</td>
+      <td>0.1023</td>
+      <td>0.0997</td>
+      <td>0.0087</td>
+      <td>0.0087</td>
+    </tr>
+    <tr>
+      <td>history_segment=5) $500 - $750</td>
+      <td>Mens E-Mail</td>
+      <td>Womens E-Mail</td>
+      <td>21307</td>
+      <td>21387</td>
+      <td>0.0750</td>
+      <td>0.0777</td>
+      <td>-0.0104</td>
+      <td>0.0104</td>
+    </tr>
+    <tr>
+      <td>history_segment=5) $500 - $750</td>
+      <td>Mens E-Mail</td>
+      <td>No E-Mail</td>
+      <td>21307</td>
+      <td>21306</td>
+      <td>0.0750</td>
+      <td>0.0775</td>
+      <td>-0.0097</td>
+      <td>0.0097</td>
+    </tr>
+    <tr>
+      <td>history_segment=5) $500 - $750</td>
+      <td>Womens E-Mail</td>
+      <td>No E-Mail</td>
+      <td>21387</td>
+      <td>21306</td>
+      <td>0.0777</td>
+      <td>0.0775</td>
+      <td>0.0006</td>
+      <td>0.0006</td>
+    </tr>
+    <tr>
+      <td>history_segment=6) $750 - $1,000</td>
+      <td>Mens E-Mail</td>
+      <td>Womens E-Mail</td>
+      <td>21307</td>
+      <td>21387</td>
+      <td>0.0302</td>
+      <td>0.0277</td>
+      <td>0.0149</td>
+      <td>0.0149</td>
+    </tr>
+    <tr>
+      <td>history_segment=6) $750 - $1,000</td>
+      <td>Mens E-Mail</td>
+      <td>No E-Mail</td>
+      <td>21307</td>
+      <td>21306</td>
+      <td>0.0302</td>
+      <td>0.0292</td>
+      <td>0.0061</td>
+      <td>0.0061</td>
+    </tr>
+    <tr>
+      <td>history_segment=6) $750 - $1,000</td>
+      <td>Womens E-Mail</td>
+      <td>No E-Mail</td>
+      <td>21387</td>
+      <td>21306</td>
+      <td>0.0277</td>
+      <td>0.0292</td>
+      <td>-0.0088</td>
+      <td>0.0088</td>
+    </tr>
+    <tr>
+      <td>history_segment=7) $1,000 +</td>
+      <td>Mens E-Mail</td>
+      <td>Womens E-Mail</td>
+      <td>21307</td>
+      <td>21387</td>
+      <td>0.0218</td>
+      <td>0.0200</td>
+      <td>0.0123</td>
+      <td>0.0123</td>
+    </tr>
+    <tr>
+      <td>history_segment=7) $1,000 +</td>
+      <td>Mens E-Mail</td>
+      <td>No E-Mail</td>
+      <td>21307</td>
+      <td>21306</td>
+      <td>0.0218</td>
+      <td>0.0195</td>
+      <td>0.0158</td>
+      <td>0.0158</td>
+    </tr>
+    <tr>
+      <td>history_segment=7) $1,000 +</td>
+      <td>Womens E-Mail</td>
+      <td>No E-Mail</td>
+      <td>21387</td>
+      <td>21306</td>
+      <td>0.0200</td>
+      <td>0.0195</td>
+      <td>0.0035</td>
+      <td>0.0035</td>
+    </tr>
+    <tr>
+      <td>region=Rural</td>
+      <td>Mens E-Mail</td>
+      <td>Womens E-Mail</td>
+      <td>21307</td>
+      <td>21387</td>
+      <td>0.1522</td>
+      <td>0.1487</td>
+      <td>0.0097</td>
+      <td>0.0097</td>
+    </tr>
+    <tr>
+      <td>region=Rural</td>
+      <td>Mens E-Mail</td>
+      <td>No E-Mail</td>
+      <td>21307</td>
+      <td>21306</td>
+      <td>0.1522</td>
+      <td>0.1473</td>
+      <td>0.0137</td>
+      <td>0.0137</td>
+    </tr>
+    <tr>
+      <td>region=Rural</td>
+      <td>Womens E-Mail</td>
+      <td>No E-Mail</td>
+      <td>21387</td>
+      <td>21306</td>
+      <td>0.1487</td>
+      <td>0.1473</td>
+      <td>0.0040</td>
+      <td>0.0040</td>
+    </tr>
+    <tr>
+      <td>region=Suburban</td>
+      <td>Mens E-Mail</td>
+      <td>Womens E-Mail</td>
+      <td>21307</td>
+      <td>21387</td>
+      <td>0.4459</td>
+      <td>0.4512</td>
+      <td>-0.0107</td>
+      <td>0.0107</td>
+    </tr>
+    <tr>
+      <td>region=Suburban</td>
+      <td>Mens E-Mail</td>
+      <td>No E-Mail</td>
+      <td>21307</td>
+      <td>21306</td>
+      <td>0.4459</td>
+      <td>0.4518</td>
+      <td>-0.0117</td>
+      <td>0.0117</td>
+    </tr>
+    <tr>
+      <td>region=Suburban</td>
+      <td>Womens E-Mail</td>
+      <td>No E-Mail</td>
+      <td>21387</td>
+      <td>21306</td>
+      <td>0.4512</td>
+      <td>0.4518</td>
+      <td>-0.0011</td>
+      <td>0.0011</td>
+    </tr>
+    <tr>
+      <td>region=Urban</td>
+      <td>Mens E-Mail</td>
+      <td>Womens E-Mail</td>
+      <td>21307</td>
+      <td>21387</td>
+      <td>0.4019</td>
+      <td>0.4001</td>
+      <td>0.0037</td>
+      <td>0.0037</td>
+    </tr>
+    <tr>
+      <td>region=Urban</td>
+      <td>Mens E-Mail</td>
+      <td>No E-Mail</td>
+      <td>21307</td>
+      <td>21306</td>
+      <td>0.4019</td>
+      <td>0.4009</td>
+      <td>0.0020</td>
+      <td>0.0020</td>
+    </tr>
+    <tr>
+      <td>region=Urban</td>
+      <td>Womens E-Mail</td>
+      <td>No E-Mail</td>
+      <td>21387</td>
+      <td>21306</td>
+      <td>0.4001</td>
+      <td>0.4009</td>
+      <td>-0.0018</td>
+      <td>0.0018</td>
+    </tr>
+    <tr>
+      <td>channel=Multichannel</td>
+      <td>Mens E-Mail</td>
+      <td>Womens E-Mail</td>
+      <td>21307</td>
+      <td>21387</td>
+      <td>0.1209</td>
+      <td>0.1206</td>
+      <td>0.0011</td>
+      <td>0.0011</td>
+    </tr>
+    <tr>
+      <td>channel=Multichannel</td>
+      <td>Mens E-Mail</td>
+      <td>No E-Mail</td>
+      <td>21307</td>
+      <td>21306</td>
+      <td>0.1209</td>
+      <td>0.1223</td>
+      <td>-0.0042</td>
+      <td>0.0042</td>
+    </tr>
+    <tr>
+      <td>channel=Multichannel</td>
+      <td>Womens E-Mail</td>
+      <td>No E-Mail</td>
+      <td>21387</td>
+      <td>21306</td>
+      <td>0.1206</td>
+      <td>0.1223</td>
+      <td>-0.0053</td>
+      <td>0.0053</td>
+    </tr>
+    <tr>
+      <td>channel=Phone</td>
+      <td>Mens E-Mail</td>
+      <td>Womens E-Mail</td>
+      <td>21307</td>
+      <td>21387</td>
+      <td>0.4337</td>
+      <td>0.4420</td>
+      <td>-0.0169</td>
+      <td>0.0169</td>
+    </tr>
+    <tr>
+      <td>channel=Phone</td>
+      <td>Mens E-Mail</td>
+      <td>No E-Mail</td>
+      <td>21307</td>
+      <td>21306</td>
+      <td>0.4337</td>
+      <td>0.4378</td>
+      <td>-0.0083</td>
+      <td>0.0083</td>
+    </tr>
+    <tr>
+      <td>channel=Phone</td>
+      <td>Womens E-Mail</td>
+      <td>No E-Mail</td>
+      <td>21387</td>
+      <td>21306</td>
+      <td>0.4420</td>
+      <td>0.4378</td>
+      <td>0.0086</td>
+      <td>0.0086</td>
+    </tr>
+    <tr>
+      <td>channel=Web</td>
+      <td>Mens E-Mail</td>
+      <td>Womens E-Mail</td>
+      <td>21307</td>
+      <td>21387</td>
+      <td>0.4454</td>
+      <td>0.4374</td>
+      <td>0.0162</td>
+      <td>0.0162</td>
+    </tr>
+    <tr>
+      <td>channel=Web</td>
+      <td>Mens E-Mail</td>
+      <td>No E-Mail</td>
+      <td>21307</td>
+      <td>21306</td>
+      <td>0.4454</td>
+      <td>0.4399</td>
+      <td>0.0110</td>
+      <td>0.0110</td>
+    </tr>
+    <tr>
+      <td>channel=Web</td>
+      <td>Womens E-Mail</td>
+      <td>No E-Mail</td>
+      <td>21387</td>
+      <td>21306</td>
+      <td>0.4374</td>
+      <td>0.4399</td>
+      <td>-0.0051</td>
+      <td>0.0051</td>
+    </tr>
+  </tbody>
+</table></div></details><details><summary>全部功效情景 · <a href="scenario_power.csv">CSV</a></summary><div class="table-wrap"><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>population</th>
+      <th>treatment</th>
+      <th>n_treatment</th>
+      <th>n_control</th>
+      <th>baseline_scenario</th>
+      <th>delta_scenario</th>
+      <th>alpha</th>
+      <th>power_approx</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Overall</td>
+      <td>Mens E-Mail</td>
+      <td>21307</td>
+      <td>21306</td>
+      <td>0.0050</td>
+      <td>0.0010</td>
+      <td>0.0250</td>
+      <td>0.1990</td>
+    </tr>
+    <tr>
+      <td>Overall</td>
+      <td>Mens E-Mail</td>
+      <td>21307</td>
+      <td>21306</td>
+      <td>0.0050</td>
+      <td>0.0020</td>
+      <td>0.0250</td>
+      <td>0.6670</td>
+    </tr>
+    <tr>
+      <td>Overall</td>
+      <td>Mens E-Mail</td>
+      <td>21307</td>
+      <td>21306</td>
+      <td>0.0050</td>
+      <td>0.0030</td>
+      <td>0.0250</td>
+      <td>0.9465</td>
+    </tr>
+    <tr>
+      <td>Overall</td>
+      <td>Mens E-Mail</td>
+      <td>21307</td>
+      <td>21306</td>
+      <td>0.0100</td>
+      <td>0.0010</td>
+      <td>0.0250</td>
+      <td>0.1101</td>
+    </tr>
+    <tr>
+      <td>Overall</td>
+      <td>Mens E-Mail</td>
+      <td>21307</td>
+      <td>21306</td>
+      <td>0.0100</td>
+      <td>0.0020</td>
+      <td>0.0250</td>
+      <td>0.3966</td>
+    </tr>
+    <tr>
+      <td>Overall</td>
+      <td>Mens E-Mail</td>
+      <td>21307</td>
+      <td>21306</td>
+      <td>0.0100</td>
+      <td>0.0030</td>
+      <td>0.0250</td>
+      <td>0.7463</td>
+    </tr>
+    <tr>
+      <td>Overall</td>
+      <td>Mens E-Mail</td>
+      <td>21307</td>
+      <td>21306</td>
+      <td>0.0200</td>
+      <td>0.0010</td>
+      <td>0.0250</td>
+      <td>0.0666</td>
+    </tr>
+    <tr>
+      <td>Overall</td>
+      <td>Mens E-Mail</td>
+      <td>21307</td>
+      <td>21306</td>
+      <td>0.0200</td>
+      <td>0.0020</td>
+      <td>0.0250</td>
+      <td>0.2115</td>
+    </tr>
+    <tr>
+      <td>Overall</td>
+      <td>Mens E-Mail</td>
+      <td>21307</td>
+      <td>21306</td>
+      <td>0.0200</td>
+      <td>0.0030</td>
+      <td>0.0250</td>
+      <td>0.4576</td>
+    </tr>
+    <tr>
+      <td>Overall</td>
+      <td>Womens E-Mail</td>
+      <td>21387</td>
+      <td>21306</td>
+      <td>0.0050</td>
+      <td>0.0010</td>
+      <td>0.0250</td>
+      <td>0.1992</td>
+    </tr>
+    <tr>
+      <td>Overall</td>
+      <td>Womens E-Mail</td>
+      <td>21387</td>
+      <td>21306</td>
+      <td>0.0050</td>
+      <td>0.0020</td>
+      <td>0.0250</td>
+      <td>0.6678</td>
+    </tr>
+    <tr>
+      <td>Overall</td>
+      <td>Womens E-Mail</td>
+      <td>21387</td>
+      <td>21306</td>
+      <td>0.0050</td>
+      <td>0.0030</td>
+      <td>0.0250</td>
+      <td>0.9469</td>
+    </tr>
+    <tr>
+      <td>Overall</td>
+      <td>Womens E-Mail</td>
+      <td>21387</td>
+      <td>21306</td>
+      <td>0.0100</td>
+      <td>0.0010</td>
+      <td>0.0250</td>
+      <td>0.1103</td>
+    </tr>
+    <tr>
+      <td>Overall</td>
+      <td>Womens E-Mail</td>
+      <td>21387</td>
+      <td>21306</td>
+      <td>0.0100</td>
+      <td>0.0020</td>
+      <td>0.0250</td>
+      <td>0.3972</td>
+    </tr>
+    <tr>
+      <td>Overall</td>
+      <td>Womens E-Mail</td>
+      <td>21387</td>
+      <td>21306</td>
+      <td>0.0100</td>
+      <td>0.0030</td>
+      <td>0.0250</td>
+      <td>0.7471</td>
+    </tr>
+    <tr>
+      <td>Overall</td>
+      <td>Womens E-Mail</td>
+      <td>21387</td>
+      <td>21306</td>
+      <td>0.0200</td>
+      <td>0.0010</td>
+      <td>0.0250</td>
+      <td>0.0667</td>
+    </tr>
+    <tr>
+      <td>Overall</td>
+      <td>Womens E-Mail</td>
+      <td>21387</td>
+      <td>21306</td>
+      <td>0.0200</td>
+      <td>0.0020</td>
+      <td>0.0250</td>
+      <td>0.2118</td>
+    </tr>
+    <tr>
+      <td>Overall</td>
+      <td>Womens E-Mail</td>
+      <td>21387</td>
+      <td>21306</td>
+      <td>0.0200</td>
+      <td>0.0030</td>
+      <td>0.0250</td>
+      <td>0.4583</td>
+    </tr>
+    <tr>
+      <td>Urban</td>
+      <td>Mens E-Mail</td>
+      <td>8563</td>
+      <td>8542</td>
+      <td>0.0050</td>
+      <td>0.0010</td>
+      <td>0.0250</td>
+      <td>0.0882</td>
+    </tr>
+    <tr>
+      <td>Urban</td>
+      <td>Mens E-Mail</td>
+      <td>8563</td>
+      <td>8542</td>
+      <td>0.0050</td>
+      <td>0.0020</td>
+      <td>0.0250</td>
+      <td>0.2918</td>
+    </tr>
+    <tr>
+      <td>Urban</td>
+      <td>Mens E-Mail</td>
+      <td>8563</td>
+      <td>8542</td>
+      <td>0.0050</td>
+      <td>0.0030</td>
+      <td>0.0250</td>
+      <td>0.5791</td>
+    </tr>
+    <tr>
+      <td>Urban</td>
+      <td>Mens E-Mail</td>
+      <td>8563</td>
+      <td>8542</td>
+      <td>0.0100</td>
+      <td>0.0010</td>
+      <td>0.0250</td>
+      <td>0.0568</td>
+    </tr>
+    <tr>
+      <td>Urban</td>
+      <td>Mens E-Mail</td>
+      <td>8563</td>
+      <td>8542</td>
+      <td>0.0100</td>
+      <td>0.0020</td>
+      <td>0.0250</td>
+      <td>0.1619</td>
+    </tr>
+    <tr>
+      <td>Urban</td>
+      <td>Mens E-Mail</td>
+      <td>8563</td>
+      <td>8542</td>
+      <td>0.0100</td>
+      <td>0.0030</td>
+      <td>0.0250</td>
+      <td>0.3440</td>
+    </tr>
+    <tr>
+      <td>Urban</td>
+      <td>Mens E-Mail</td>
+      <td>8563</td>
+      <td>8542</td>
+      <td>0.0200</td>
+      <td>0.0010</td>
+      <td>0.0250</td>
+      <td>0.0410</td>
+    </tr>
+    <tr>
+      <td>Urban</td>
+      <td>Mens E-Mail</td>
+      <td>8563</td>
+      <td>8542</td>
+      <td>0.0200</td>
+      <td>0.0020</td>
+      <td>0.0250</td>
+      <td>0.0927</td>
+    </tr>
+    <tr>
+      <td>Urban</td>
+      <td>Mens E-Mail</td>
+      <td>8563</td>
+      <td>8542</td>
+      <td>0.0200</td>
+      <td>0.0030</td>
+      <td>0.0250</td>
+      <td>0.1871</td>
+    </tr>
+    <tr>
+      <td>Urban</td>
+      <td>Womens E-Mail</td>
+      <td>8556</td>
+      <td>8542</td>
+      <td>0.0050</td>
+      <td>0.0010</td>
+      <td>0.0250</td>
+      <td>0.0882</td>
+    </tr>
+    <tr>
+      <td>Urban</td>
+      <td>Womens E-Mail</td>
+      <td>8556</td>
+      <td>8542</td>
+      <td>0.0050</td>
+      <td>0.0020</td>
+      <td>0.0250</td>
+      <td>0.2917</td>
+    </tr>
+    <tr>
+      <td>Urban</td>
+      <td>Womens E-Mail</td>
+      <td>8556</td>
+      <td>8542</td>
+      <td>0.0050</td>
+      <td>0.0030</td>
+      <td>0.0250</td>
+      <td>0.5789</td>
+    </tr>
+    <tr>
+      <td>Urban</td>
+      <td>Womens E-Mail</td>
+      <td>8556</td>
+      <td>8542</td>
+      <td>0.0100</td>
+      <td>0.0010</td>
+      <td>0.0250</td>
+      <td>0.0568</td>
+    </tr>
+    <tr>
+      <td>Urban</td>
+      <td>Womens E-Mail</td>
+      <td>8556</td>
+      <td>8542</td>
+      <td>0.0100</td>
+      <td>0.0020</td>
+      <td>0.0250</td>
+      <td>0.1618</td>
+    </tr>
+    <tr>
+      <td>Urban</td>
+      <td>Womens E-Mail</td>
+      <td>8556</td>
+      <td>8542</td>
+      <td>0.0100</td>
+      <td>0.0030</td>
+      <td>0.0250</td>
+      <td>0.3439</td>
+    </tr>
+    <tr>
+      <td>Urban</td>
+      <td>Womens E-Mail</td>
+      <td>8556</td>
+      <td>8542</td>
+      <td>0.0200</td>
+      <td>0.0010</td>
+      <td>0.0250</td>
+      <td>0.0410</td>
+    </tr>
+    <tr>
+      <td>Urban</td>
+      <td>Womens E-Mail</td>
+      <td>8556</td>
+      <td>8542</td>
+      <td>0.0200</td>
+      <td>0.0020</td>
+      <td>0.0250</td>
+      <td>0.0926</td>
+    </tr>
+    <tr>
+      <td>Urban</td>
+      <td>Womens E-Mail</td>
+      <td>8556</td>
+      <td>8542</td>
+      <td>0.0200</td>
+      <td>0.0030</td>
+      <td>0.0250</td>
+      <td>0.1871</td>
+    </tr>
+    <tr>
+      <td>Suburban</td>
+      <td>Mens E-Mail</td>
+      <td>9501</td>
+      <td>9625</td>
+      <td>0.0050</td>
+      <td>0.0010</td>
+      <td>0.0250</td>
+      <td>0.0966</td>
+    </tr>
+    <tr>
+      <td>Suburban</td>
+      <td>Mens E-Mail</td>
+      <td>9501</td>
+      <td>9625</td>
+      <td>0.0050</td>
+      <td>0.0020</td>
+      <td>0.0250</td>
+      <td>0.3266</td>
+    </tr>
+    <tr>
+      <td>Suburban</td>
+      <td>Mens E-Mail</td>
+      <td>9501</td>
+      <td>9625</td>
+      <td>0.0050</td>
+      <td>0.0030</td>
+      <td>0.0250</td>
+      <td>0.6336</td>
+    </tr>
+    <tr>
+      <td>Suburban</td>
+      <td>Mens E-Mail</td>
+      <td>9501</td>
+      <td>9625</td>
+      <td>0.0100</td>
+      <td>0.0010</td>
+      <td>0.0250</td>
+      <td>0.0608</td>
+    </tr>
+    <tr>
+      <td>Suburban</td>
+      <td>Mens E-Mail</td>
+      <td>9501</td>
+      <td>9625</td>
+      <td>0.0100</td>
+      <td>0.0020</td>
+      <td>0.0250</td>
+      <td>0.1804</td>
+    </tr>
+    <tr>
+      <td>Suburban</td>
+      <td>Mens E-Mail</td>
+      <td>9501</td>
+      <td>9625</td>
+      <td>0.0100</td>
+      <td>0.0030</td>
+      <td>0.0250</td>
+      <td>0.3841</td>
+    </tr>
+    <tr>
+      <td>Suburban</td>
+      <td>Mens E-Mail</td>
+      <td>9501</td>
+      <td>9625</td>
+      <td>0.0200</td>
+      <td>0.0010</td>
+      <td>0.0250</td>
+      <td>0.0430</td>
+    </tr>
+    <tr>
+      <td>Suburban</td>
+      <td>Mens E-Mail</td>
+      <td>9501</td>
+      <td>9625</td>
+      <td>0.0200</td>
+      <td>0.0020</td>
+      <td>0.0250</td>
+      <td>0.1016</td>
+    </tr>
+    <tr>
+      <td>Suburban</td>
+      <td>Mens E-Mail</td>
+      <td>9501</td>
+      <td>9625</td>
+      <td>0.0200</td>
+      <td>0.0030</td>
+      <td>0.0250</td>
+      <td>0.2089</td>
+    </tr>
+    <tr>
+      <td>Suburban</td>
+      <td>Womens E-Mail</td>
+      <td>9650</td>
+      <td>9625</td>
+      <td>0.0050</td>
+      <td>0.0010</td>
+      <td>0.0250</td>
+      <td>0.0970</td>
+    </tr>
+    <tr>
+      <td>Suburban</td>
+      <td>Womens E-Mail</td>
+      <td>9650</td>
+      <td>9625</td>
+      <td>0.0050</td>
+      <td>0.0020</td>
+      <td>0.0250</td>
+      <td>0.3285</td>
+    </tr>
+    <tr>
+      <td>Suburban</td>
+      <td>Womens E-Mail</td>
+      <td>9650</td>
+      <td>9625</td>
+      <td>0.0050</td>
+      <td>0.0030</td>
+      <td>0.0250</td>
+      <td>0.6368</td>
+    </tr>
+    <tr>
+      <td>Suburban</td>
+      <td>Womens E-Mail</td>
+      <td>9650</td>
+      <td>9625</td>
+      <td>0.0100</td>
+      <td>0.0010</td>
+      <td>0.0250</td>
+      <td>0.0610</td>
+    </tr>
+    <tr>
+      <td>Suburban</td>
+      <td>Womens E-Mail</td>
+      <td>9650</td>
+      <td>9625</td>
+      <td>0.0100</td>
+      <td>0.0020</td>
+      <td>0.0250</td>
+      <td>0.1814</td>
+    </tr>
+    <tr>
+      <td>Suburban</td>
+      <td>Womens E-Mail</td>
+      <td>9650</td>
+      <td>9625</td>
+      <td>0.0100</td>
+      <td>0.0030</td>
+      <td>0.0250</td>
+      <td>0.3865</td>
+    </tr>
+    <tr>
+      <td>Suburban</td>
+      <td>Womens E-Mail</td>
+      <td>9650</td>
+      <td>9625</td>
+      <td>0.0200</td>
+      <td>0.0010</td>
+      <td>0.0250</td>
+      <td>0.0431</td>
+    </tr>
+    <tr>
+      <td>Suburban</td>
+      <td>Womens E-Mail</td>
+      <td>9650</td>
+      <td>9625</td>
+      <td>0.0200</td>
+      <td>0.0020</td>
+      <td>0.0250</td>
+      <td>0.1021</td>
+    </tr>
+    <tr>
+      <td>Suburban</td>
+      <td>Womens E-Mail</td>
+      <td>9650</td>
+      <td>9625</td>
+      <td>0.0200</td>
+      <td>0.0030</td>
+      <td>0.0250</td>
+      <td>0.2103</td>
+    </tr>
+    <tr>
+      <td>Rural</td>
+      <td>Mens E-Mail</td>
+      <td>3243</td>
+      <td>3139</td>
+      <td>0.0050</td>
+      <td>0.0010</td>
+      <td>0.0250</td>
+      <td>0.0468</td>
+    </tr>
+    <tr>
+      <td>Rural</td>
+      <td>Mens E-Mail</td>
+      <td>3243</td>
+      <td>3139</td>
+      <td>0.0050</td>
+      <td>0.0020</td>
+      <td>0.0250</td>
+      <td>0.1133</td>
+    </tr>
+    <tr>
+      <td>Rural</td>
+      <td>Mens E-Mail</td>
+      <td>3243</td>
+      <td>3139</td>
+      <td>0.0050</td>
+      <td>0.0030</td>
+      <td>0.0250</td>
+      <td>0.2248</td>
+    </tr>
+    <tr>
+      <td>Rural</td>
+      <td>Mens E-Mail</td>
+      <td>3243</td>
+      <td>3139</td>
+      <td>0.0100</td>
+      <td>0.0010</td>
+      <td>0.0250</td>
+      <td>0.0363</td>
+    </tr>
+    <tr>
+      <td>Rural</td>
+      <td>Mens E-Mail</td>
+      <td>3243</td>
+      <td>3139</td>
+      <td>0.0100</td>
+      <td>0.0020</td>
+      <td>0.0250</td>
+      <td>0.0709</td>
+    </tr>
+    <tr>
+      <td>Rural</td>
+      <td>Mens E-Mail</td>
+      <td>3243</td>
+      <td>3139</td>
+      <td>0.0100</td>
+      <td>0.0030</td>
+      <td>0.0250</td>
+      <td>0.1314</td>
+    </tr>
+    <tr>
+      <td>Rural</td>
+      <td>Mens E-Mail</td>
+      <td>3243</td>
+      <td>3139</td>
+      <td>0.0200</td>
+      <td>0.0010</td>
+      <td>0.0250</td>
+      <td>0.0308</td>
+    </tr>
+    <tr>
+      <td>Rural</td>
+      <td>Mens E-Mail</td>
+      <td>3243</td>
+      <td>3139</td>
+      <td>0.0200</td>
+      <td>0.0020</td>
+      <td>0.0250</td>
+      <td>0.0484</td>
+    </tr>
+    <tr>
+      <td>Rural</td>
+      <td>Mens E-Mail</td>
+      <td>3243</td>
+      <td>3139</td>
+      <td>0.0200</td>
+      <td>0.0030</td>
+      <td>0.0250</td>
+      <td>0.0792</td>
+    </tr>
+    <tr>
+      <td>Rural</td>
+      <td>Womens E-Mail</td>
+      <td>3181</td>
+      <td>3139</td>
+      <td>0.0050</td>
+      <td>0.0010</td>
+      <td>0.0250</td>
+      <td>0.0468</td>
+    </tr>
+    <tr>
+      <td>Rural</td>
+      <td>Womens E-Mail</td>
+      <td>3181</td>
+      <td>3139</td>
+      <td>0.0050</td>
+      <td>0.0020</td>
+      <td>0.0250</td>
+      <td>0.1129</td>
+    </tr>
+    <tr>
+      <td>Rural</td>
+      <td>Womens E-Mail</td>
+      <td>3181</td>
+      <td>3139</td>
+      <td>0.0050</td>
+      <td>0.0030</td>
+      <td>0.0250</td>
+      <td>0.2237</td>
+    </tr>
+    <tr>
+      <td>Rural</td>
+      <td>Womens E-Mail</td>
+      <td>3181</td>
+      <td>3139</td>
+      <td>0.0100</td>
+      <td>0.0010</td>
+      <td>0.0250</td>
+      <td>0.0362</td>
+    </tr>
+    <tr>
+      <td>Rural</td>
+      <td>Womens E-Mail</td>
+      <td>3181</td>
+      <td>3139</td>
+      <td>0.0100</td>
+      <td>0.0020</td>
+      <td>0.0250</td>
+      <td>0.0707</td>
+    </tr>
+    <tr>
+      <td>Rural</td>
+      <td>Womens E-Mail</td>
+      <td>3181</td>
+      <td>3139</td>
+      <td>0.0100</td>
+      <td>0.0030</td>
+      <td>0.0250</td>
+      <td>0.1307</td>
+    </tr>
+    <tr>
+      <td>Rural</td>
+      <td>Womens E-Mail</td>
+      <td>3181</td>
+      <td>3139</td>
+      <td>0.0200</td>
+      <td>0.0010</td>
+      <td>0.0250</td>
+      <td>0.0307</td>
+    </tr>
+    <tr>
+      <td>Rural</td>
+      <td>Womens E-Mail</td>
+      <td>3181</td>
+      <td>3139</td>
+      <td>0.0200</td>
+      <td>0.0020</td>
+      <td>0.0250</td>
+      <td>0.0483</td>
+    </tr>
+    <tr>
+      <td>Rural</td>
+      <td>Womens E-Mail</td>
+      <td>3181</td>
+      <td>3139</td>
+      <td>0.0200</td>
+      <td>0.0030</td>
+      <td>0.0250</td>
+      <td>0.0788</td>
+    </tr>
+  </tbody>
+</table></div></details><details><summary>全部MDE情景 · <a href="scenario_mde.csv">CSV</a></summary><div class="table-wrap"><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>population</th>
+      <th>treatment</th>
+      <th>baseline_scenario</th>
+      <th>target_power</th>
+      <th>mde_probability</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Overall</td>
+      <td>Mens E-Mail</td>
+      <td>0.0050</td>
+      <td>0.8000</td>
+      <td>0.0023</td>
+    </tr>
+    <tr>
+      <td>Overall</td>
+      <td>Mens E-Mail</td>
+      <td>0.0050</td>
+      <td>0.9000</td>
+      <td>0.0027</td>
+    </tr>
+    <tr>
+      <td>Overall</td>
+      <td>Mens E-Mail</td>
+      <td>0.0100</td>
+      <td>0.8000</td>
+      <td>0.0032</td>
+    </tr>
+    <tr>
+      <td>Overall</td>
+      <td>Mens E-Mail</td>
+      <td>0.0100</td>
+      <td>0.9000</td>
+      <td>0.0037</td>
+    </tr>
+    <tr>
+      <td>Overall</td>
+      <td>Mens E-Mail</td>
+      <td>0.0200</td>
+      <td>0.8000</td>
+      <td>0.0044</td>
+    </tr>
+    <tr>
+      <td>Overall</td>
+      <td>Mens E-Mail</td>
+      <td>0.0200</td>
+      <td>0.9000</td>
+      <td>0.0051</td>
+    </tr>
+    <tr>
+      <td>Overall</td>
+      <td>Womens E-Mail</td>
+      <td>0.0050</td>
+      <td>0.8000</td>
+      <td>0.0023</td>
+    </tr>
+    <tr>
+      <td>Overall</td>
+      <td>Womens E-Mail</td>
+      <td>0.0050</td>
+      <td>0.9000</td>
+      <td>0.0027</td>
+    </tr>
+    <tr>
+      <td>Overall</td>
+      <td>Womens E-Mail</td>
+      <td>0.0100</td>
+      <td>0.8000</td>
+      <td>0.0032</td>
+    </tr>
+    <tr>
+      <td>Overall</td>
+      <td>Womens E-Mail</td>
+      <td>0.0100</td>
+      <td>0.9000</td>
+      <td>0.0037</td>
+    </tr>
+    <tr>
+      <td>Overall</td>
+      <td>Womens E-Mail</td>
+      <td>0.0200</td>
+      <td>0.8000</td>
+      <td>0.0044</td>
+    </tr>
+    <tr>
+      <td>Overall</td>
+      <td>Womens E-Mail</td>
+      <td>0.0200</td>
+      <td>0.9000</td>
+      <td>0.0051</td>
+    </tr>
+    <tr>
+      <td>Urban</td>
+      <td>Mens E-Mail</td>
+      <td>0.0050</td>
+      <td>0.8000</td>
+      <td>0.0039</td>
+    </tr>
+    <tr>
+      <td>Urban</td>
+      <td>Mens E-Mail</td>
+      <td>0.0050</td>
+      <td>0.9000</td>
+      <td>0.0046</td>
+    </tr>
+    <tr>
+      <td>Urban</td>
+      <td>Mens E-Mail</td>
+      <td>0.0100</td>
+      <td>0.8000</td>
+      <td>0.0053</td>
+    </tr>
+    <tr>
+      <td>Urban</td>
+      <td>Mens E-Mail</td>
+      <td>0.0100</td>
+      <td>0.9000</td>
+      <td>0.0061</td>
+    </tr>
+    <tr>
+      <td>Urban</td>
+      <td>Mens E-Mail</td>
+      <td>0.0200</td>
+      <td>0.8000</td>
+      <td>0.0072</td>
+    </tr>
+    <tr>
+      <td>Urban</td>
+      <td>Mens E-Mail</td>
+      <td>0.0200</td>
+      <td>0.9000</td>
+      <td>0.0083</td>
+    </tr>
+    <tr>
+      <td>Urban</td>
+      <td>Womens E-Mail</td>
+      <td>0.0050</td>
+      <td>0.8000</td>
+      <td>0.0039</td>
+    </tr>
+    <tr>
+      <td>Urban</td>
+      <td>Womens E-Mail</td>
+      <td>0.0050</td>
+      <td>0.9000</td>
+      <td>0.0046</td>
+    </tr>
+    <tr>
+      <td>Urban</td>
+      <td>Womens E-Mail</td>
+      <td>0.0100</td>
+      <td>0.8000</td>
+      <td>0.0053</td>
+    </tr>
+    <tr>
+      <td>Urban</td>
+      <td>Womens E-Mail</td>
+      <td>0.0100</td>
+      <td>0.9000</td>
+      <td>0.0061</td>
+    </tr>
+    <tr>
+      <td>Urban</td>
+      <td>Womens E-Mail</td>
+      <td>0.0200</td>
+      <td>0.8000</td>
+      <td>0.0072</td>
+    </tr>
+    <tr>
+      <td>Urban</td>
+      <td>Womens E-Mail</td>
+      <td>0.0200</td>
+      <td>0.9000</td>
+      <td>0.0083</td>
+    </tr>
+    <tr>
+      <td>Suburban</td>
+      <td>Mens E-Mail</td>
+      <td>0.0050</td>
+      <td>0.8000</td>
+      <td>0.0037</td>
+    </tr>
+    <tr>
+      <td>Suburban</td>
+      <td>Mens E-Mail</td>
+      <td>0.0050</td>
+      <td>0.9000</td>
+      <td>0.0043</td>
+    </tr>
+    <tr>
+      <td>Suburban</td>
+      <td>Mens E-Mail</td>
+      <td>0.0100</td>
+      <td>0.8000</td>
+      <td>0.0049</td>
+    </tr>
+    <tr>
+      <td>Suburban</td>
+      <td>Mens E-Mail</td>
+      <td>0.0100</td>
+      <td>0.9000</td>
+      <td>0.0057</td>
+    </tr>
+    <tr>
+      <td>Suburban</td>
+      <td>Mens E-Mail</td>
+      <td>0.0200</td>
+      <td>0.8000</td>
+      <td>0.0067</td>
+    </tr>
+    <tr>
+      <td>Suburban</td>
+      <td>Mens E-Mail</td>
+      <td>0.0200</td>
+      <td>0.9000</td>
+      <td>0.0078</td>
+    </tr>
+    <tr>
+      <td>Suburban</td>
+      <td>Womens E-Mail</td>
+      <td>0.0050</td>
+      <td>0.8000</td>
+      <td>0.0037</td>
+    </tr>
+    <tr>
+      <td>Suburban</td>
+      <td>Womens E-Mail</td>
+      <td>0.0050</td>
+      <td>0.9000</td>
+      <td>0.0043</td>
+    </tr>
+    <tr>
+      <td>Suburban</td>
+      <td>Womens E-Mail</td>
+      <td>0.0100</td>
+      <td>0.8000</td>
+      <td>0.0049</td>
+    </tr>
+    <tr>
+      <td>Suburban</td>
+      <td>Womens E-Mail</td>
+      <td>0.0100</td>
+      <td>0.9000</td>
+      <td>0.0057</td>
+    </tr>
+    <tr>
+      <td>Suburban</td>
+      <td>Womens E-Mail</td>
+      <td>0.0200</td>
+      <td>0.8000</td>
+      <td>0.0067</td>
+    </tr>
+    <tr>
+      <td>Suburban</td>
+      <td>Womens E-Mail</td>
+      <td>0.0200</td>
+      <td>0.9000</td>
+      <td>0.0077</td>
+    </tr>
+    <tr>
+      <td>Rural</td>
+      <td>Mens E-Mail</td>
+      <td>0.0050</td>
+      <td>0.8000</td>
+      <td>0.0071</td>
+    </tr>
+    <tr>
+      <td>Rural</td>
+      <td>Mens E-Mail</td>
+      <td>0.0050</td>
+      <td>0.9000</td>
+      <td>0.0084</td>
+    </tr>
+    <tr>
+      <td>Rural</td>
+      <td>Mens E-Mail</td>
+      <td>0.0100</td>
+      <td>0.8000</td>
+      <td>0.0093</td>
+    </tr>
+    <tr>
+      <td>Rural</td>
+      <td>Mens E-Mail</td>
+      <td>0.0100</td>
+      <td>0.9000</td>
+      <td>0.0109</td>
+    </tr>
+    <tr>
+      <td>Rural</td>
+      <td>Mens E-Mail</td>
+      <td>0.0200</td>
+      <td>0.8000</td>
+      <td>0.0123</td>
+    </tr>
+    <tr>
+      <td>Rural</td>
+      <td>Mens E-Mail</td>
+      <td>0.0200</td>
+      <td>0.9000</td>
+      <td>0.0143</td>
+    </tr>
+    <tr>
+      <td>Rural</td>
+      <td>Womens E-Mail</td>
+      <td>0.0050</td>
+      <td>0.8000</td>
+      <td>0.0072</td>
+    </tr>
+    <tr>
+      <td>Rural</td>
+      <td>Womens E-Mail</td>
+      <td>0.0050</td>
+      <td>0.9000</td>
+      <td>0.0085</td>
+    </tr>
+    <tr>
+      <td>Rural</td>
+      <td>Womens E-Mail</td>
+      <td>0.0100</td>
+      <td>0.8000</td>
+      <td>0.0093</td>
+    </tr>
+    <tr>
+      <td>Rural</td>
+      <td>Womens E-Mail</td>
+      <td>0.0100</td>
+      <td>0.9000</td>
+      <td>0.0109</td>
+    </tr>
+    <tr>
+      <td>Rural</td>
+      <td>Womens E-Mail</td>
+      <td>0.0200</td>
+      <td>0.8000</td>
+      <td>0.0124</td>
+    </tr>
+    <tr>
+      <td>Rural</td>
+      <td>Womens E-Mail</td>
+      <td>0.0200</td>
+      <td>0.9000</td>
+      <td>0.0144</td>
+    </tr>
+  </tbody>
+</table></div></details><details><summary>全部样本量情景 · <a href="scenario_required_n.csv">CSV</a></summary><div class="table-wrap"><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>baseline_scenario</th>
+      <th>delta_scenario</th>
+      <th>target_power</th>
+      <th>n_per_arm_equal</th>
+      <th>n_three_arms_equal</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>0.0050</td>
+      <td>0.0010</td>
+      <td>0.8000</td>
+      <td>103980</td>
+      <td>311940</td>
+    </tr>
+    <tr>
+      <td>0.0050</td>
+      <td>0.0010</td>
+      <td>0.9000</td>
+      <td>135771</td>
+      <td>407313</td>
+    </tr>
+    <tr>
+      <td>0.0050</td>
+      <td>0.0020</td>
+      <td>0.8000</td>
+      <td>28344</td>
+      <td>85032</td>
+    </tr>
+    <tr>
+      <td>0.0050</td>
+      <td>0.0020</td>
+      <td>0.9000</td>
+      <td>37009</td>
+      <td>111027</td>
+    </tr>
+    <tr>
+      <td>0.0050</td>
+      <td>0.0030</td>
+      <td>0.8000</td>
+      <td>13640</td>
+      <td>40920</td>
+    </tr>
+    <tr>
+      <td>0.0050</td>
+      <td>0.0030</td>
+      <td>0.9000</td>
+      <td>17809</td>
+      <td>53427</td>
+    </tr>
+    <tr>
+      <td>0.0100</td>
+      <td>0.0010</td>
+      <td>0.8000</td>
+      <td>197509</td>
+      <td>592527</td>
+    </tr>
+    <tr>
+      <td>0.0100</td>
+      <td>0.0010</td>
+      <td>0.9000</td>
+      <td>257897</td>
+      <td>773691</td>
+    </tr>
+    <tr>
+      <td>0.0100</td>
+      <td>0.0020</td>
+      <td>0.8000</td>
+      <td>51702</td>
+      <td>155106</td>
+    </tr>
+    <tr>
+      <td>0.0100</td>
+      <td>0.0020</td>
+      <td>0.9000</td>
+      <td>67509</td>
+      <td>202527</td>
+    </tr>
+    <tr>
+      <td>0.0100</td>
+      <td>0.0030</td>
+      <td>0.8000</td>
+      <td>24011</td>
+      <td>72033</td>
+    </tr>
+    <tr>
+      <td>0.0100</td>
+      <td>0.0030</td>
+      <td>0.9000</td>
+      <td>31351</td>
+      <td>94053</td>
+    </tr>
+    <tr>
+      <td>0.0200</td>
+      <td>0.0010</td>
+      <td>0.8000</td>
+      <td>381717</td>
+      <td>1145151</td>
+    </tr>
+    <tr>
+      <td>0.0200</td>
+      <td>0.0010</td>
+      <td>0.9000</td>
+      <td>498426</td>
+      <td>1495278</td>
+    </tr>
+    <tr>
+      <td>0.0200</td>
+      <td>0.0020</td>
+      <td>0.8000</td>
+      <td>97707</td>
+      <td>293121</td>
+    </tr>
+    <tr>
+      <td>0.0200</td>
+      <td>0.0020</td>
+      <td>0.9000</td>
+      <td>127580</td>
+      <td>382740</td>
+    </tr>
+    <tr>
+      <td>0.0200</td>
+      <td>0.0030</td>
+      <td>0.8000</td>
+      <td>44436</td>
+      <td>133308</td>
+    </tr>
+    <tr>
+      <td>0.0200</td>
+      <td>0.0030</td>
+      <td>0.9000</td>
+      <td>58022</td>
+      <td>174066</td>
+    </tr>
+  </tbody>
+</table></div></details>
+<footer><p>本地运行：项目目录执行 <code>.venv\Scripts\python.exe scripts/run_offline.py</code>，生成本报告与CSV/JSON。首次安装或重新下载需网络，缓存齐备后无需云平台。
+参见 <a href="../README.zh-CN.md">中文复现说明</a>、<a href="../docs/PLAN_v1.md">已确认计划</a>、<a href="../docs/AUDIT_METHODS.md">实现口径</a>、<a href="verification.json">复现验证记录</a>。</p></footer>
+</main></body></html>

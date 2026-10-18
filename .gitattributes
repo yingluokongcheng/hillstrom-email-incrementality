@@ -1,0 +1,2 @@
+# Preserve frozen source and evidence bytes across Git checkouts.
+* -text

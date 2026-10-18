@@ -1,0 +1,3 @@
+treatment,control,outcome,n_treatment,n_control,events_treatment,events_control,rate_treatment,rate_control,difference,confidence_level,status,ci_low,ci_high
+Mens E-Mail,No E-Mail,visit,21307,21306,3894,2262,0.182756840474961,0.10616727682343,0.0765895636515312,0.95,ok,0.0699599305057359,0.0832339443978253
+Womens E-Mail,No E-Mail,visit,21387,21306,3238,2262,0.151400383410483,0.10616727682343,0.045233106587053,0.95,ok,0.0388983782693316,0.0515792643075081

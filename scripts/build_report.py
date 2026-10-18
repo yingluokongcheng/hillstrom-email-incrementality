@@ -1,0 +1,84 @@
+from pathlib import Path
+import json,html
+import pandas as pd
+ROOT=Path(__file__).resolve().parents[1]
+NAMES={'Mens E-Mail':'男装邮件','Womens E-Mail':'女装邮件','No E-Mail':'不发邮件',
+       'Urban':'城市 Urban','Suburban':'郊区 Suburban','Rural':'乡村 Rural'}
+def table(rows):
+    return '<div class="table-wrap">'+pd.DataFrame(rows).to_html(index=False,escape=True,border=0)+'</div>'
+def pp(x): return f'{x*100:+.3f}'
+def ci(row,scale=100): return f'[{row["ci_low"]*scale:+.3f}, {row["ci_high"]*scale:+.3f}]'
+def main():
+    folder=ROOT/'reports'; d=json.loads((folder/'effects_results.json').read_text(encoding='utf-8'))
+    primary=[]; group=[]; regions=[]; secondary=[]
+    for r in d['primary']:
+        if r['status']!='ok':
+            primary.append({'比较':NAMES[r['treatment']]+' − 不发邮件','状态':r['status']}); continue
+        primary.append({'比较':NAMES[r['treatment']]+' − 不发邮件','提升（pp）':pp(r['difference']),
+            '97.5%校正区间（pp）':ci(r),'Bonferroni p':f'{r["p_bonferroni"]:.6g}',
+            '校正后显著':'是' if r['significant_bonferroni'] else '否','下限高于+0.10pp':'是' if r['ci_low']>.001 else '否'})
+        group.append({'分配组':NAMES[r['treatment']],'人数':r['n_treatment'],'购买人数':r['events_treatment'],'购买率':f'{r["rate_treatment"]:.4%}'})
+    c=d['primary'][0]; group.append({'分配组':'不发邮件','人数':c['n_control'],'购买人数':c['events_control'],'购买率':f'{c["rate_control"]:.4%}'})
+    for region in ['Urban','Suburban','Rural']:
+        for r in d['exploratory_regions']:
+            if r['region']!=region: continue
+            regions.append({'地区':NAMES[region],'邮件':NAMES[r['treatment']],'邮件/对照人数':f'{r["n_treatment"]:,} / {r["n_control"]:,}',
+                            '提升（pp）':pp(r['difference']),'名义95%区间（pp）':ci(r),
+                            '区间包含0':'是' if r['ci_low']<=0<=r['ci_high'] else '否'})
+    for r in d['exploratory_visit']:
+        secondary.append({'指标':'访问率差（pp）','比较':NAMES[r['treatment']]+' − 不发邮件','估计':pp(r['difference']),'名义95%区间':ci(r)})
+    for r in d['exploratory_spend']:
+        secondary.append({'指标':'每名分配客户消费额差（美元）','比较':NAMES[r['treatment']]+' − 不发邮件','估计':f'{r["difference"]:+.3f}','名义95%区间':ci(r,1)})
+    a,b=d['primary']; rural=next(x for x in d['exploratory_regions'] if x['region']=='Rural' and x['treatment']=='Womens E-Mail')
+    explanation=''.join(f'<li><b>{NAMES[r["treatment"]]}：</b>每万人估计增加 {r["difference"]*10000:.1f} 名购买客户，校正区间为 [{r["ci_low"]*10000:.1f}, {r["ci_high"]*10000:.1f}]。{html.escape(r["interpretation"])}</li>' for r in d['primary'] if r['status']=='ok')
+    text=f'''<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Hillstrom 固定效果分析结果</title><style>
+*{{box-sizing:border-box}}body{{margin:0;background:#f3f6fa;color:#213247;font:16px/1.8 system-ui,"Microsoft YaHei",sans-serif}}
+main{{max-width:1180px;margin:32px auto;padding:0 24px 50px}}header{{background:#163750;color:white;padding:30px;border-radius:15px}}
+.eyebrow{{font-size:13px;color:#c0dceb;letter-spacing:1px}}h1{{font-size:30px;margin:8px 0}}h2{{font-size:22px;margin-top:32px}}
+.callout{{background:#e6f2ef;border-left:5px solid #327d6e;padding:18px 23px;margin:24px 0;border-radius:8px}}
+.caution{{background:#fff3db;border-left-color:#bc8326}}.table-wrap{{overflow-x:auto;background:white;border:1px solid #d9e3eb;border-radius:9px;margin:14px 0}}
+table{{width:100%;border-collapse:collapse;font-size:14px}}th,td{{text-align:left;padding:11px 12px;border-bottom:1px solid #e6edf3;white-space:nowrap}}
+th{{background:#e9f1f7;color:#21435b}}tr:last-child td{{border-bottom:0}}p{{margin:12px 0}}a{{color:#126b87}}code{{font-size:13px;overflow-wrap:anywhere}}
+.note{{font-size:14px;color:#53677a}}details{{padding:12px 16px;border:1px solid #d9e3eb;background:white;border-radius:8px;margin:12px 0}}
+summary{{cursor:pointer;font-weight:600}}footer{{border-top:1px solid #ccd8e3;margin-top:30px;padding-top:18px}}
+@media(max-width:700px){{main{{padding:0 12px}}header{{padding:20px}}h1{{font-size:24px}}}}
+</style></head><body><main><header><div class="eyebrow">HILLSTROM · FIXED ANALYSIS V1 · 2026-10-17</div>
+<h1>邮件是否增加购买？</h1><p>两项总体比较 / Bonferroni校正 / 地区仅探索<br>保留全部64,000行；未发布；未追加分组或模型。</p></header>
+<div class="callout"><b>两种邮件均有总体正向增量证据，校正区间下限均超过 +0.10 个百分点的情景基准。</b>
+<p>男装邮件：{pp(a['difference'])}pp，97.5%区间 {ci(a)}pp。<br>女装邮件：{pp(b['difference'])}pp，97.5%区间 {ci(b)}pp。</p>
+<p>这些结论以公开随机分组说明、行代表独立客户及结果记录可靠为前提，不是盈利证明，也不能推断某种邮件显著优于另一种。</p></div>
+<h2>01 / 唯一主指标：两周购买率</h2>{table(group)}
+<p>以各组全部分配记录为分母，没有只看访问者或购买者，没有删除相同行。男装/女装描述邮件内容，不代表客户性别。</p>
+<h2>02 / 校正后的总体比较</h2>{table(primary)}
+<p>pp=百分点，+0.10pp=概率差0.001。双侧MN修正score检验，区间由同一检验数值反演。两项比较组成一个家族：α=0.05，每项α=0.025，对应97.5%区间；p_adj=min(2p,1)。</p>
+<p>区间是Bonferroni调整下的逐项区间，基于score渐近近似，不宣称有限样本精确的家族覆盖。<a href="primary_conversion.csv">完整主结果CSV（含原始p值）</a></p>
+<h2>03 / 相对 +0.10 个百分点，能说到哪里？</h2><ul>{explanation}</ul>
+<p><b>女装邮件下限仅约+0.128pp，距+0.10pp较近。</b>支持达到情景基准不等于“远高于基准”，更不能直接推荐全面投放。没有邮件成本、利润、退订或长期客户价值数据。</p>
+<p>没有另外增加“超过0.10pp”的事后检验，而是用已经校正的同一组区间作判断。男装邮件点估计更大，但本版未检验两种邮件的直接差异，不宣布邮件优劣。</p>
+<div class="callout caution"><b>为什么之前说功效不足，现在仍然显著？</b>
+<p>审计说的是：如果真实提升只有+0.10pp，当前样本通常难以检出。此次总体观察差分别约+0.68pp和+0.31pp，明显大于该假设小效果。低功效不意味着任何大小的效果都不能检出；本轮没有用观察效果重算事后功效，也没有修改基准。</p></div>
+<h2>04 / 地区探索：完整保留六项结果</h2>{table(regions)}
+<div class="callout caution"><b>乡村女装邮件结果不确定，照实保留。</b><p>点估计{pp(rural['difference'])}pp，名义95%区间{ci(rural)}pp，包含负向、零和有意义的正向效果。不能写成“乡村无效”，也不能用它与其他地区是否跨零的差别证明地区异质性。</p></div>
+<p>六个点估计均为正，但并非六项都得到明确正向证据。此处区间未经六重比较校正，不是同时覆盖区间；不输出地区p值、显著赢家或投放名单。没有地区交互检验、因果机制验证或进一步切分。Urban/Suburban/Rural只表示城乡类别，不支持具体城市、文化或地方偏好的因果解释。</p>
+<p><a href="exploratory_regions.csv">完整地区CSV</a></p>
+<h2>05 / 次要探索指标</h2>{table(secondary)}
+<p>访问率用名义95%score区间；人均消费额包括零消费客户，用组内20,000次经验bootstrap的百分位95%区间，seed=20261017，共享同一对照抽样。按唯一消费值的多项分布计数抽样，与逐行有放回抽样等价；没有裁剪高消费值。</p>
+<p>这些区间未作多重调整，不替换购买率主结论。消费额是收入指标，不是净利润。<a href="exploratory_visit.csv">访问率CSV</a> · <a href="exploratory_spend.csv">消费额CSV</a> · <a href="bootstrap_group_means.csv">全部bootstrap组均值</a></p>
+<h2>06 / 必须随结果保留的局限</h2>
+<ul><li>7,634行涉及完全相同组合，全部保留。缺少客户ID，无法证明这些行来自独立客户；若实际重复客户存在，区间可能过窄、p值过小。</li>
+<li>使用与文档校验码一致的公开镜像，未与作者原始字节对账。缺少分配/送达日志和个体时间戳，不能独立确认名册完整、执行合规或每人观察窗口。</li>
+<li>数据为既有公开实验，审计已查看分组购买数；本项目不是新实验、盲态分析或原始实验前预注册。两周效果不代表长期效果或当前业务可迁移性。</li>
+<li>+0.10pp仅为用户确认的情景基准，不是经过成本收益验证的商业门槛。</li></ul>
+<h2>07 / 计算验证与可复现</h2>
+<p>固定配置、种子、依赖和首次执行前哈希均保存。模拟校验覆盖共享对照的误报控制、已知效果覆盖、符号反转、独立公式对账、bootstrap零值及稀疏停止规则。模拟是程序验证，不是实际A/A实验。</p>
+<details><summary>区间实现问题及处理记录</summary><p>正式计算前，合成数据检查发现statsmodels发布包中非零差值score的三次方程系数问题。0.14.4与安装的0.15.0均复现该问题；未声称发布包已修复。主实现直接求解受约束二项似然，再反演同一MN-score检验；独立修正多项式验证端点，零差值与statsmodels核对。没有改变统计方法或放宽测试精度。</p>
+<p><a href="https://github.com/statsmodels/statsmodels/issues/10269">上游问题说明</a> · <a href="../docs/EXECUTION_SCOPE.md">本项目执行记录</a>。这属于正式效果计算前的实现纠错，不是为了显著性追加方法。</p></details>
+<p><a href="verification.json">复现与验证JSON</a> · <a href="test_results.txt">测试日志</a> · <a href="../docs/pre_run_freeze.json">首次执行前哈希</a> · <a href="effects_results.json">完整结果JSON</a></p>
+<footer><p>本机双击 <code>Run_analysis.cmd</code> 重跑；或运行 <code>.venv\\Scripts\\python.exe scripts/run_offline.py</code>。
+安装及初次取数需网络；数据与环境齐备后，本地分析禁用Python网络连接/DNS，不依赖Google Cloud。</p>
+<p><a href="../README.zh-CN.md">中文启动说明</a> · <a href="../docs/APPROVED_PLAN_v1.md">原批准计划</a> · <a href="../history/audit/reports/Hillstrom数据审计.html">保留的原审计报告</a></p></footer>
+</main></body></html>'''
+    (folder/'Hillstrom总体效果与地区探索.html').write_text(text,encoding='utf-8')
+    print('Built fixed-effect report.')
+if __name__=='__main__': main()

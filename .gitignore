@@ -1,0 +1,7 @@
+.venv/
+__pycache__/
+data/raw/*.csv
+data/raw/*.gz
+history/audit/data/raw/*.csv
+history/audit/data/raw/*.gz
+history/audit/reports/identical_rows.csv

@@ -1,0 +1,113 @@
+{
+  "verified_at_utc": "2026-10-17T04:21:40.968812+00:00",
+  "tests_passed": true,
+  "test_methods": 8,
+  "independent_census_passed": true,
+  "independent_score_checks": [
+    {
+      "outcome": "conversion",
+      "region": "Overall",
+      "treatment": "Mens E-Mail",
+      "endpoint_reference_passed": true
+    },
+    {
+      "outcome": "conversion",
+      "region": "Overall",
+      "treatment": "Womens E-Mail",
+      "endpoint_reference_passed": true
+    },
+    {
+      "outcome": "conversion",
+      "region": "Urban",
+      "treatment": "Mens E-Mail",
+      "endpoint_reference_passed": true
+    },
+    {
+      "outcome": "conversion",
+      "region": "Suburban",
+      "treatment": "Mens E-Mail",
+      "endpoint_reference_passed": true
+    },
+    {
+      "outcome": "conversion",
+      "region": "Rural",
+      "treatment": "Mens E-Mail",
+      "endpoint_reference_passed": true
+    },
+    {
+      "outcome": "conversion",
+      "region": "Urban",
+      "treatment": "Womens E-Mail",
+      "endpoint_reference_passed": true
+    },
+    {
+      "outcome": "conversion",
+      "region": "Suburban",
+      "treatment": "Womens E-Mail",
+      "endpoint_reference_passed": true
+    },
+    {
+      "outcome": "conversion",
+      "region": "Rural",
+      "treatment": "Womens E-Mail",
+      "endpoint_reference_passed": true
+    },
+    {
+      "outcome": "visit",
+      "region": "Overall",
+      "treatment": "Mens E-Mail",
+      "endpoint_reference_passed": true
+    },
+    {
+      "outcome": "visit",
+      "region": "Overall",
+      "treatment": "Womens E-Mail",
+      "endpoint_reference_passed": true
+    }
+  ],
+  "reproduced_outputs": [
+    {
+      "file": "bootstrap_group_means.csv",
+      "sha256": "6868678c20b5706f1bbb28a4388c65928b539fcbd874e1b5c9a18a4cbca2a63c",
+      "byte_identical": true
+    },
+    {
+      "file": "effects_results.json",
+      "sha256": "7e176965c33efa3088751dadf97936ac3b2966c3567596964fc75a865011d638",
+      "byte_identical": true
+    },
+    {
+      "file": "exploratory_regions.csv",
+      "sha256": "edf3be69a718c7bcfd98a312881507aad4f28246d0a57eaf83ac3827344f9aff",
+      "byte_identical": true
+    },
+    {
+      "file": "exploratory_spend.csv",
+      "sha256": "bd559dba9b229132310e45397cf092bb7a012782fde7f11a38ac414f09952edc",
+      "byte_identical": true
+    },
+    {
+      "file": "exploratory_visit.csv",
+      "sha256": "e004d409bc3aa786fa44f9ff4822da14ace24979a0b49cbbd1097f9d34cf616b",
+      "byte_identical": true
+    },
+    {
+      "file": "Hillstrom总体效果与地区探索.html",
+      "sha256": "6e47f17a8d9197881bb1da5482f4fa69f64f8d5856de57f8229d849ade888a18",
+      "byte_identical": true
+    },
+    {
+      "file": "primary_conversion.csv",
+      "sha256": "51a49a7042457bbdfeb71f1db7f1a907e101ce666fbebf4c5bf1f0d03b06cdda",
+      "byte_identical": true
+    }
+  ],
+  "all_byte_identical": true,
+  "original_audit_files_unchanged": 38,
+  "archived_audit_files_byte_identical": 38,
+  "local_html_links_checked": 13,
+  "network_block": "Python socket connection and DNS disabled, not operating-system firewall",
+  "independent_directory": "C:\\Users\\28600\\Documents\\Codex\\2026-10-16\\github-plugin-github-openai-curated-remote\\work\\hillstrom-effects-reproduction-20261017",
+  "published": false,
+  "pre_effect_validation_history": "Two synthetic reference failures with statsmodels 0.14.4 and 0.15.0; nonzero-null library coefficient bug. Kept MN-score direct likelihood solver, validated with corrected independent polynomial. No tolerance relaxation or effect-driven change."
+}

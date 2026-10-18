@@ -1,0 +1,15 @@
+numpy==2.2.6
+pandas==2.2.3
+scipy==1.15.3
+statsmodels==0.15.0
+patsy==1.0.1
+packaging==25.0
+python-dateutil==2.9.0.post0
+pytz==2026.1.post1
+tzdata==2025.2
+six==1.17.0
+formulaic==1.2.2
+interface-meta==2.0.1
+narwhals==2.27.1
+typing_extensions==4.16.0
+wrapt==2.5.1

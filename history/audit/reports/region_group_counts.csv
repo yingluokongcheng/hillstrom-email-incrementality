@@ -1,0 +1,10 @@
+region,segment,n,purchases,nonpurchases,missing_purchase
+Rural,Mens E-Mail,3243,44,3199,0
+Rural,No E-Mail,3139,26,3113,0
+Rural,Womens E-Mail,3181,37,3144,0
+Suburban,Mens E-Mail,9501,118,9383,0
+Suburban,No E-Mail,9625,48,9577,0
+Suburban,Womens E-Mail,9650,73,9577,0
+Urban,Mens E-Mail,8563,105,8458,0
+Urban,No E-Mail,8542,48,8494,0
+Urban,Womens E-Mail,8556,79,8477,0
